@@ -167,7 +167,6 @@ class TUSC:
 		self.bldc_R.set_speed(input_R, self.scalar)
 
 
-
 def main():
 	# Initialize Pygame and the joystick module
 	pygame.init()
@@ -206,6 +205,7 @@ def main():
 						print()
 						print("Software Kill Switch triggered.")
 						print("Quiting...")
+						tusc.set_speed(0, 0)
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -258,10 +258,12 @@ def main():
 
 	except KeyboardInterrupt:
 		print("Keyboard interrupt")
+		tusc.set_speed(0, 0)
 		tusc.pi.stop()
 		pygame.quit()
 
 	finally:
+		tusc.set_speed(0, 0)
 		tusc.pi.stop()
 		pygame.quit()
 
