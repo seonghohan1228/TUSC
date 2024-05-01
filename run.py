@@ -156,6 +156,10 @@ class TUSC:
 		else:
 			print("Wrong trim direction. Exiting...")
 			exit()
+	
+	def reset_trim(self):
+		self.bldc_L = 0
+		self.bldc_R = 0
 
 	def set_speed(self, input_L, input_R):
 		self.bldc_L.set_speed(input_L)
@@ -235,24 +239,13 @@ def main():
 					## Trimming
 	 				# Trim so that robot steers towards left
 					if joystick.get_button(ps4_buttons["left"]):
-						if trim_R < 0:  # reduce the right trim first.
-							trim_R += 5
-						else:
-							trim_L -= 5
-						if trim_L == -100:
-							trim_L = -100
+						tusc.trim("L")
 	 				# Trim so that robot steers towards right
 					elif joystick.get_button(ps4_buttons["right"]):
-						if trim_L < 0:
-							trim_L += 5
-						else:
-							trim_R -= 5
-						if trim_R == -100:
-							trim_R = -100
+						tusc.tirm("R")
 					# Trim reset
 					elif joystick.get_button(ps4_buttons["share"]):
-						trim_L = 0
-						trim_R = 0
+						tusc.reset_trim()
 
 			if tusc.lin_act.joystick_control == False:
 				tusc.lin_act.counter += 1
