@@ -242,7 +242,7 @@ def main():
 						tusc.trim("L")
 	 				# Trim so that robot steers towards right
 					elif joystick.get_button(ps4_buttons["right"]):
-						tusc.tirm("R")
+						tusc.trim("R")
 					# Trim reset
 					elif joystick.get_button(ps4_buttons["share"]):
 						tusc.reset_trim()
