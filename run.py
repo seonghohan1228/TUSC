@@ -92,15 +92,16 @@ class BLDC:
 			print("Trim value below minimum value. Exiting...")
 			exit()
 
-		self.set_speed(self.input)
+		self.set_speed(self.input, self.scalar)
 
-	def set_speed(self, input):
+	def set_speed(self, input, scalar):
+		self.scalar = scalar
 		self.speed = (self.scalar / 100) * input * (100 + self.trim)
 		self.set_pwm()
 
 	def set_pwm(self):
-		pulsewidth = (self.MAX_PULSEWIDTH - self.MAX_PULSEWIDTH) * \
-					 (self.speed / 100) + self.MIN_PULSEWIDTH
+		pulsewidth = (self.MAX_PULSEWIDTH - self.MIN_PULSEWIDTH) * \
+					 (self.speed / 100) + self.IDLE_PULSEWIDTH
 		self.pi.set_servo_pulsewidth(self.pwm_pin, pulsewidth)
 
 
@@ -110,30 +111,30 @@ class TUSC:
 	PWM_PIN_L = 13
 	PWM_PIN_R = 12
 	SCALARS = [20, 40, 60, 80, 100]
-	LIN_ACT_COUNT = 2000
+	LIN_ACT_COUNT = 500
 
 	def __init__(self):
 		# Setup Pi and actuators
 		self.pi = pigpio.pi()
 		self.gear = 1
 		self.set_scalar(self.gear)
-		self.lin_act = LinearActuator(self.pi, self.LIN_ACT_IN_1_PIN, 
+		self.lin_act = LinearActuator(self.pi, self.LIN_ACT_IN_1_PIN, \
 								  self.LIN_ACT_IN_2_PIN)
-		self.bldc_L = BLDC(self.pi, self.PWM_PIN_L, 
+		self.bldc_L = BLDC(self.pi, self.PWM_PIN_L, \
 					 scalar=self.scalar, trim=0)
-		self.bldc_R = BLDC(self.pi, self.PWM_PIN_R, 
+		self.bldc_R = BLDC(self.pi, self.PWM_PIN_R, \
 					 scalar=self.scalar, trim=0)
 	
 	def upshift(self):
-		if self.gear > len(self.SCALARS):
-			return
 		self.gear += 1
+		if self.gear > len(self.SCALARS):
+			self.gear = len(self.SCALARS)
 		self.set_scalar(self.gear)
 	
 	def downshift(self):
-		if self.gear < 1:
-			return
 		self.gear -= 1
+		if self.gear < 1:
+			self.gear = 1
 		self.set_scalar(self.gear)
 	
 	def set_scalar(self, gear):
@@ -158,12 +159,12 @@ class TUSC:
 			exit()
 	
 	def reset_trim(self):
-		self.bldc_L = 0
-		self.bldc_R = 0
+		self.bldc_L.trim = 0
+		self.bldc_R.trim = 0
 
 	def set_speed(self, input_L, input_R):
-		self.bldc_L.set_speed(input_L)
-		self.bldc_R.set_speed(input_R)
+		self.bldc_L.set_speed(input_L, self.scalar)
+		self.bldc_R.set_speed(input_R, self.scalar)
 
 
 
@@ -252,6 +253,7 @@ def main():
 				if tusc.lin_act.counter >= tusc.LIN_ACT_COUNT:
 					tusc.lin_act.stop()
 					tusc.lin_act.counter = 0
+					tusc.lin_act.joystick_control = True
 
 
 	except KeyboardInterrupt:
