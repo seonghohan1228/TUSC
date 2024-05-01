@@ -110,7 +110,7 @@ class TUSC:
 	PWM_PIN_L = 13
 	PWM_PIN_R = 12
 	SCALARS = [20, 40, 60, 80, 100]
-	LIN_ACT_COUNT = 6000
+	LIN_ACT_COUNT = 4000
 
 	def __init__(self):
 		# Setup Pi and actuators
