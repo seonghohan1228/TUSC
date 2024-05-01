@@ -110,8 +110,9 @@ class TUSC:
 	LIN_ACT_IN_2_PIN = 27
 	PWM_PIN_L = 13
 	PWM_PIN_R = 12
-	SCALARS = [20, 40, 60, 80, 100]
-	LIN_ACT_COUNT = 500
+	SCALARS = [10, 15, 20, 40, 80]
+	LIN_ACT_COUNT = 1000
+	DEFAULT_SENSITIVITY = 0.2
 
 	def __init__(self):
 		# Setup Pi and actuators
@@ -124,6 +125,8 @@ class TUSC:
 					 scalar=self.scalar, trim=0)
 		self.bldc_R = BLDC(self.pi, self.PWM_PIN_R, \
 					 scalar=self.scalar, trim=0)
+		self.sensitivity = DEFAULT_SENSITIVITY
+		self.mode = "steer"
 	
 	def upshift(self):
 		self.gear += 1
@@ -163,8 +166,39 @@ class TUSC:
 		self.bldc_R.trim = 0
 
 	def set_speed(self, input_L, input_R):
-		self.bldc_L.set_speed(input_L, self.scalar)
-		self.bldc_R.set_speed(input_R, self.scalar)
+		if self.mode == "tank":
+			mapped_input_L = input_L
+			mapped_input_R = input_R
+		if self.mode == "steer":
+			mapped_input_L = input_L + self.sensitivity * input_R
+			mapped_input_R = input_L - self.sensitivity * input_R
+			if mapped_input_L < 0:
+				mapped_input_L = 0
+			if mapped_input_R < 0:
+				mapped_input_R = 0
+			if mapped_input_L > 1:
+				mapped_input_L = 1
+			if mapped_input_R > 1:
+				mapped_input_R = 1
+		
+		self.bldc_L.set_speed(mapped_input_L, self.scalar)
+		self.bldc_R.set_speed(mapped_input_R, self.scalar)
+	
+	def increase_sensitivity(self):
+		self.sensitivity += 0.1
+		if self.sensitivity >= 1:
+			self.sensitivity = 1
+			
+	def decrease_sensitivity(self):
+		self.sensitivity -= 0.1
+		if self.sensitivity <= 0.1:
+			self.sensitivity = 0.1
+	
+	def switch_mode(self):
+		if self.mode == "steer":
+			self.mode = "tank"
+		elif self.mode == "tank":
+			self.mode = "steer"
 
 
 def main():
@@ -189,7 +223,10 @@ def main():
 		while True:
 			# Get joystick angle (negative is forward)
 			axis_value_L = -joystick.get_axis(1)
-			axis_value_R = -joystick.get_axis(3)
+			if tusc.mode == "steer":
+				axis_value_R = joystick.get_axis(2)  # Right joystick x
+			elif tusc.mode == "tank":
+				axis_value_R = -joystick.get_axis(3)  # Right joystick y
 			
 			tusc.set_speed(axis_value_L, axis_value_R)
 			
@@ -239,14 +276,26 @@ def main():
 					
 					## Trimming
 	 				# Trim so that robot steers towards left
-					if joystick.get_button(ps4_buttons["left"]):
+					if joystick.get_button(ps4_buttons["square"]):
 						tusc.trim("L")
 	 				# Trim so that robot steers towards right
-					elif joystick.get_button(ps4_buttons["right"]):
+					elif joystick.get_button(ps4_buttons["circle"]):
 						tusc.trim("R")
 					# Trim reset
-					elif joystick.get_button(ps4_buttons["share"]):
+					elif joystick.get_button(ps4_buttons["options"]):
 						tusc.reset_trim()
+					
+					## Sensitivity
+					if joystick.get_button(ps4_buttons["left"]):
+						tusc.decrease_sensitivity()
+					elif joystick.get_button(ps4_buttons["right"]):
+						tusc.increase_sensitivity()
+					elif joystick.get_button(ps4_buttons["share"]):
+						tusc.sensitivity = tusc.sensitivity
+					
+					## Mode
+					if joystick.get_button(ps4_buttons["touchpad"]):
+						tusc.switch_mode()
 
 			if tusc.lin_act.joystick_control == False:
 				tusc.lin_act.counter += 1
