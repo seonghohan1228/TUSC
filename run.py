@@ -1,6 +1,7 @@
 import pigpio
 import pygame
 import time
+import math
 
 
 DOWN = 0
@@ -27,6 +28,15 @@ ps4_buttons = {
 	"left": 13,
 	"right": 14,
 	"touchpad": 15
+}
+
+ps4_axes = {
+	"l_stick_h": 0,
+	"l_stick_v": 1,
+	"r_stick_h": 2,
+	"r_stick_v": 3,
+	"l2_trigger": 4,
+	"r2_trigger": 5,
 }
 
 
@@ -165,21 +175,39 @@ class TUSC:
 		self.bldc_L.trim = 0
 		self.bldc_R.trim = 0
 
-	def set_speed(self, input_L, input_R):
+	def set_speed(self,input, steer_UD, steer_LR):
 		if self.mode == "tank":
-			mapped_input_L = input_L
-			mapped_input_R = input_R
-		if self.mode == "steer":
-			mapped_input_L = input_L + self.sensitivity * input_R
-			mapped_input_R = input_L - self.sensitivity * input_R
-			if mapped_input_L < 0:
-				mapped_input_L = 0
-			if mapped_input_R < 0:
-				mapped_input_R = 0
-			if mapped_input_L > 1:
-				mapped_input_L = 1
-			if mapped_input_R > 1:
-				mapped_input_R = 1
+			# mapped_input_L = input_L
+			# mapped_input_R = input_R
+			# (x,y) = (steer_LR, steer_UD)
+
+			interval = 0.3 * input
+			angle = 2. * math.atan2(-steer_LR, steer_UD)/ math.pi
+			
+			forward = True
+			if angle > 1 or angle < -1:
+				forward = False
+				angle = angle - 1 if angle > 0 else angle + 1
+
+			mapped_input_L = min(input, input - 0.3*angle)
+			mapped_input_R = min(input, input + 0.3*angle)
+			
+
+			mapped_input_L = mapped_input_L * (1 if forward else -1)
+			mapped_input_R = mapped_input_R * (1 if forward else -1)
+			
+
+		# if self.mode == "steer":
+		# 	mapped_input_L = input_L + self.sensitivity * input_R
+		# 	mapped_input_R = input_L - self.sensitivity * input_R
+		# 	if mapped_input_L < 0:
+		# 		mapped_input_L = 0
+		# 	if mapped_input_R < 0:
+		# 		mapped_input_R = 0
+		# 	if mapped_input_L > 1:
+		# 		mapped_input_L = 1
+		# 	if mapped_input_R > 1:
+		# 		mapped_input_R = 1
 		
 		self.bldc_L.set_speed(mapped_input_L, self.scalar)
 		self.bldc_R.set_speed(mapped_input_R, self.scalar)
@@ -222,14 +250,20 @@ def main():
 		# Main loop
 		while True:
 			# Get joystick angle (negative is forward)
-			axis_value_L = -joystick.get_axis(1)
+			axis_value_UD = -joystick.get_axis(ps4_axes["l_stick_v"])
 			if tusc.mode == "steer":
-				axis_value_R = joystick.get_axis(2)  # Right joystick x
+				pass
+				# axis_value_R = joystick.get_axis(2)  # Right joystick x
 			elif tusc.mode == "tank":
-				axis_value_R = -joystick.get_axis(3)  # Right joystick y
+				axis_value_LR = -joystick.get_axis(ps4_axes["l_stick_h"])  # Right joystick y
 			
-			tusc.set_speed(axis_value_L, axis_value_R)
+			l2_trigger = (joystick.get_axis(ps4_axes["l2_trigger"]) + 1.0) /2.
+			r2_trigger = (joystick.get_axis(ps4_axes["r2_trigger"]) + 1.0) /2.
 			
+			speed_input = l2_trigger - r2_trigger
+			
+			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD, steer_LR=axis_value_LR)
+
             # Handle Pygame events
 			events = pygame.event.get()
 			for event in events:
@@ -295,7 +329,8 @@ def main():
 					
 					## Mode
 					if joystick.get_button(ps4_buttons["touchpad"]):
-						tusc.switch_mode()
+						pass
+						# tusc.switch_mode()
 
 			if tusc.lin_act.joystick_control == False:
 				tusc.lin_act.counter += 1
