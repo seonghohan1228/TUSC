@@ -175,14 +175,16 @@ class TUSC:
 		self.bldc_L.trim = 0
 		self.bldc_R.trim = 0
 
-	def set_speed(self,input, steer_UD, steer_LR):
+	def set_speed(self,input, steer_UD=None, steer_LR=None):
 		if self.mode == "tank":
 			# mapped_input_L = input_L
 			# mapped_input_R = input_R
 			# (x,y) = (steer_LR, steer_UD)
 
-			interval = 0.3 * input
-			angle = 2. * math.atan2(-steer_LR, steer_UD)/ math.pi
+			interval = 0.3
+			angle = 0 
+			if steer_UD != None and steer_LR!=None:
+				angle = 2. * math.atan2(-steer_LR, steer_UD)/ math.pi
 			
 			forward = True
 			if angle > 1 or angle < -1:
@@ -195,6 +197,7 @@ class TUSC:
 
 			mapped_input_L = mapped_input_L * (1 if forward else -1)
 			mapped_input_R = mapped_input_R * (1 if forward else -1)
+
 			
 
 		# if self.mode == "steer":
@@ -276,7 +279,7 @@ def main():
 						print()
 						print("Software Kill Switch triggered.")
 						print("Quiting...")
-						tusc.set_speed(0, 0)
+						tusc.set_speed(0)
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -342,12 +345,12 @@ def main():
 
 	except KeyboardInterrupt:
 		print("Keyboard interrupt")
-		tusc.set_speed(0, 0)
+		tusc.set_speed(0)
 		tusc.pi.stop()
 		pygame.quit()
 
 	finally:
-		tusc.set_speed(0, 0)
+		tusc.set_speed(0)
 		tusc.pi.stop()
 		pygame.quit()
 
