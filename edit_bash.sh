@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo '
-# chris was here
+### TUSC EDIT ###
+
 alias eb="gedit ~/.bashrc"
 alias sb="source ~/.bashrc"
 
@@ -9,5 +10,10 @@ alias sb="source ~/.bashrc"
 alias tusc_ready="cd ~/TUSC/BLDC_Test/pigpio-master && sudo ./pigpiod && cd .."
 alias tusc_test="sudo python3 joystick_control_test.py"
 alias tusc_calibrate="sudo python3 calibrate.py"
-alias tusc="tusc_ready && tusc_test"' >> ~/.bashrc
+alias tusc="tusc_ready && tusc_test"
+
+### END OF EDIT ###
+
+' >> ~/.bashrc
+
 
