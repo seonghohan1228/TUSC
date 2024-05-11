@@ -100,7 +100,7 @@ class BLDC:
 		self.set_pwm()
 
 	def set_pwm(self):
-		pulsewidth = (self.MAX_PULSEWIDTH - self.MIN_PULSEWIDTH) * \
+		pulsewidth = (self.MAX_PULSEWIDTH - self.IDLE_PULSEWIDTH_PULSEWIDTH) * \
 					 (self.speed / 100) + self.IDLE_PULSEWIDTH
 		self.pi.set_servo_pulsewidth(self.pwm_pin, pulsewidth)
 
