@@ -1,6 +1,8 @@
 pigpio-master/*
 master.zip
 .vscode
+pigpio-master/
+master.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
