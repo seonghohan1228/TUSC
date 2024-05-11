@@ -125,7 +125,7 @@ class TUSC:
 					 scalar=self.scalar, trim=0)
 		self.bldc_R = BLDC(self.pi, self.PWM_PIN_R, \
 					 scalar=self.scalar, trim=0)
-		self.sensitivity = DEFAULT_SENSITIVITY
+		self.sensitivity = self.DEFAULT_SENSITIVITY
 		self.mode = "steer"
 	
 	def upshift(self):
@@ -172,10 +172,10 @@ class TUSC:
 		if self.mode == "steer":
 			mapped_input_L = input_L + self.sensitivity * input_R
 			mapped_input_R = input_L - self.sensitivity * input_R
-			if mapped_input_L < 0:
-				mapped_input_L = 0
-			if mapped_input_R < 0:
-				mapped_input_R = 0
+			if mapped_input_L < -1:
+				mapped_input_L = -1
+			if mapped_input_R < -1:
+				mapped_input_R = -1
 			if mapped_input_L > 1:
 				mapped_input_L = 1
 			if mapped_input_R > 1:
