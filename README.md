@@ -1,6 +1,13 @@
 # ME400 Team 1 Group B TUSC (Tracks Used for Stair Climbing)
 
 # Initializing Environment
+Make the bash scripts executable:
+
+```console
+user@pi:~$ chmod +x ./edit_bash.sh ./pigpiod_setup.sh
+```
+
+##
 Edit `.bashrc` by running the bash script `edit_bash`:
 ```console
 user@pi:~$ ./edit_bash.sh
@@ -9,7 +16,7 @@ user@pi:~$ ./edit_bash.sh
 This will add relevant aliases to the `.bashrc` file.
 
 
-# Installing and running pigpiod
+## Installing and running pigpiod
 To install the Raspberry Pi's GPIO utility: pigpiod, execute the setup script:
 ```console
 user@pi:~$ ./pigpiod_setup.sh
