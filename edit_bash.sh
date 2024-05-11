@@ -16,4 +16,6 @@ alias tusc="tusc_ready && tusc_run"
 
 ' >> ~/.bashrc
 
+source ~/.bashrc
+
 
