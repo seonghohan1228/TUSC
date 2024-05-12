@@ -1,82 +1,46 @@
 #include <Servo.h>
 
-const byte interruptPin1 = 2;
-const byte interruptPin2 = 3;
-
-volatile unsigned long pwm_value[2] = {0, 0};
-volatile unsigned long timer[2] = {0, 0};
-
-int ESCPin_L = 5;
-int ESCPin_R = 6;
+int ESCPin_L = 9;
+int ESCPin_R = 10;
 
 // Pulsewidth units are in ms
 int MIN_PULSEWIDTH = 1000;
 int IDLE_PULSEWIDTH = 1500;
 int MAX_PULSEWIDTH = 2000;
+int DEADBAND = 5;
 
-int pulsewidth_L;
-int pulsewidth_R;
+int inputSpeed[2];
+
+int servoValue_L;
+int servoValue_R;
 
 Servo ESC_L;    // Create servo object to control the ESC
 Servo ESC_R;
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("\nSerial connection started.\n");
-  delay(500);
+  Serial.begin(9600);
+  pinMode(5, OUTPUT);
 
   ESC_L.attach(ESCPin_L, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
   ESC_R.attach(ESCPin_R, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
 
-  // When external interrupt pin 2, 3 go high, call the rising function
-  attachInterrupt(digitalPinToInterrupt(interruptPin1), calcPWM1, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(interruptPin2), calcPWM2, CHANGE);
 }
 
 void loop()
 {
-  /*
-  static int currentTime = 0;
-  Serial.print("Time interval: ");
-  Serial.print(millis() - currentTime);
-  Serial.println(" ms");
-  currentTime = millis();*/
-
-  // Set PWM output for ESCs
-  int servoValue_L = map(pwm_value[0], MIN_PULSEWIDTH, MAX_PULSEWIDTH, 0, 180);
-  int servoValue_R = map(pwm_value[1], MIN_PULSEWIDTH, MAX_PULSEWIDTH, 0, 180);
-
-  ESC_L.write(servoValue_L);
-  ESC_R.write(servoValue_R);
+  if (Serial.available() >= 2) {
+    for (int i = 0; i < 2; i++){
+      inputSpeed[i] = Serial.read();
+      inputSpeed[i] -= 100;  // To fit range of 0~255
+    }
+  }
+  int brightness = map(inputSpeed[0], -100, 100, 0, 255);
+  analogWrite(5, brightness);
   
-  printValues(pwm_value[0], pwm_value[1]);
+  ESC_L.write(map(inputSpeed[0], -100, 100, 0, 180));
+  ESC_R.write(map(inputSpeed[1], -100, 100, 0, 180));
 }
-
-
-void calcPWM1() 
-{
-  if(digitalRead(interruptPin1) == HIGH) { 
-    timer[0] = micros();
-    } 
-  else {
-    if(timer[0] != 0) {
-      pwm_value[0] = micros() - timer[0];
-      }
-    } 
-} 
-
-void calcPWM2() 
-{
-  if(digitalRead(interruptPin2) == HIGH) { 
-    timer[1] = micros();
-    } 
-  else {
-    if(timer[1] != 0) {
-      pwm_value[1] = micros() - timer[1];
-      }
-    } 
-} 
 
 
 void printValues(int value_L, int value_R)
