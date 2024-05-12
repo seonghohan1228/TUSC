@@ -247,6 +247,7 @@ def main():
 						print("Software Kill Switch triggered.")
 						print("Quiting...")
 						tusc.set_speed(0, 0)
+						ser.write(struct.pack('>BB', 0 + 100, 0 + 100))
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -311,12 +312,14 @@ def main():
 
 	except KeyboardInterrupt:
 		print("Keyboard interrupt")
+		ser.write(struct.pack('>BB', 0 + 100, 0 + 100))
 		tusc.set_speed(0, 0)
 		tusc.pi.stop()
 		pygame.quit()
 
 	finally:
 		tusc.set_speed(0, 0)
+		ser.write(struct.pack('>BB', 0 + 100, 0 + 100))
 		tusc.pi.stop()
 		pygame.quit()
 
