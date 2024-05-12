@@ -1,6 +1,8 @@
 import pigpio
 import pygame
 import time
+import serial
+import struct
 
 
 DOWN = 0
@@ -202,6 +204,7 @@ class TUSC:
 
 
 def main():
+	ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 	# Initialize Pygame and the joystick module
 	pygame.init()
 	pygame.joystick.init()
@@ -229,6 +232,7 @@ def main():
 				axis_value_R = -joystick.get_axis(3)  # Right joystick y
 			
 			tusc.set_speed(axis_value_L, axis_value_R)
+			ser.write(struct.pack('>BB', int(tusc.bldc_L.speed) + 100, int(tusc.bldc_R.speed) + 100))
 			
             # Handle Pygame events
 			events = pygame.event.get()
