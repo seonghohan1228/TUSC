@@ -180,6 +180,8 @@ class TUSC:
 	def set_speed(self,input, steer_UD=None, steer_LR=None):
 
 		if steer_UD == None or steer_LR == None:
+			self.bldc_L.set_speed(input, self.scalar)
+			self.bldc_R.set_speed(input, self.scalar)
 			return
 		
 		
