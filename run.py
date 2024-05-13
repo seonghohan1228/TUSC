@@ -209,7 +209,11 @@ class TUSC:
 			
 			interval = 0.3
 			forward = True if steer_UD >= 0 else False
-			angle = 2. * math.atan2(steer_LR, -steer_UD)/math.pi if forward else 2. * math.atan2(-steer_LR, steer_UD)/math.pi
+			
+			if steer_LR**2 + steer_UD**2 > 0.5**2:
+				angle = 2. * math.atan2(-steer_LR, steer_UD)/math.pi if forward else 2. * math.atan2(-steer_LR, -steer_UD)/math.pi
+			else:
+				angle = 0.
 			
 			# mapped_input_L = max(-1., min(1. ,input + (-interval*angle if angle<0 else interval*angle) * (1 if forward else -1)))
 			# mapped_input_R = max(-1., min(1. ,input + (+interval*angle if angle<0 else -interval*angle) * (1 if forward else -1)))
