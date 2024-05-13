@@ -35,8 +35,8 @@ void loop()
       inputSpeed[i] -= 100;  // To fit range of 0~255
     }
   }
-  int brightness = map(inputSpeed[0], -100, 100, 0, 255);
-  analogWrite(5, brightness);
+  //int brightness = map(inputSpeed[0], -100, 100, 0, 255);
+  //analogWrite(5, brightness);
   
   ESC_L.write(map(inputSpeed[0], -100, 100, 0, 180));
   ESC_R.write(map(inputSpeed[1], -100, 100, 0, 180));
