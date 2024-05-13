@@ -7,10 +7,10 @@
 // Pin numbers
 int ModeLEDPin0 = 2;
 int ModeLEDPin1 = 3;
-int SpeedLevelLEDPin0 = 4;
-int SpeedLevelLEDPin1 = 5;
-int SpeedLevelLEDPin2 = 6;
-int SpeedLevelLEDPin3 = 7;
+int GearLEDPin0 = 4;
+int GearLEDPin1 = 5;
+int GearLEDPin2 = 6;
+int GearLEDPin3 = 7;
 
 int ESCPin_L = 9;
 int ESCPin_R = 10;
@@ -35,10 +35,10 @@ void setup()
   // LED pins
   pinMode(ModeLEDPin0, OUTPUT);
   pinMode(ModeLEDPin1, OUTPUT);
-  pinMode(SpeedLevelLEDPin0, OUTPUT);
-  pinMode(SpeedLevelLEDPin1, OUTPUT);
-  pinMode(SpeedLevelLEDPin2, OUTPUT);
-  pinMode(SpeedLevelLEDPin3, OUTPUT);
+  pinMode(GearLEDPin0, OUTPUT);
+  pinMode(GearLEDPin1, OUTPUT);
+  pinMode(GearLEDPin2, OUTPUT);
+  pinMode(GearLEDPin3, OUTPUT);
 
   // PWM pins for ESCs
   ESC_L.attach(ESCPin_L, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
@@ -86,28 +86,28 @@ void LED_control(int mode, int gear)
   switch (gear)
   {
     case 1:
-      digitalWrite(SpeedLevelLEDPin0, HIGH);
-      digitalWrite(SpeedLevelLEDPin1, LOW);
-      digitalWrite(SpeedLevelLEDPin2, LOW);
-      digitalWrite(SpeedLevelLEDPin3, LOW);
+      digitalWrite(GearLEDPin0, HIGH);
+      digitalWrite(GearLEDPin1, LOW);
+      digitalWrite(GearLEDPin2, LOW);
+      digitalWrite(GearLEDPin3, LOW);
       break;
     case 2:
-      digitalWrite(SpeedLevelLEDPin0, HIGH);
-      digitalWrite(SpeedLevelLEDPin1, HIGH);
-      digitalWrite(SpeedLevelLEDPin2, LOW);
-      digitalWrite(SpeedLevelLEDPin3, LOW);
+      digitalWrite(GearLEDPin0, HIGH);
+      digitalWrite(GearLEDPin1, HIGH);
+      digitalWrite(GearLEDPin2, LOW);
+      digitalWrite(GearLEDPin3, LOW);
       break;
     case 3:
-      digitalWrite(SpeedLevelLEDPin0, HIGH);
-      digitalWrite(SpeedLevelLEDPin1, HIGH);
-      digitalWrite(SpeedLevelLEDPin2, HIGH);
-      digitalWrite(SpeedLevelLEDPin3, LOW);
+      digitalWrite(GearLEDPin0, HIGH);
+      digitalWrite(GearLEDPin1, HIGH);
+      digitalWrite(GearLEDPin2, HIGH);
+      digitalWrite(GearLEDPin3, LOW);
       break;
     case 4:
-      digitalWrite(SpeedLevelLEDPin0, HIGH);
-      digitalWrite(SpeedLevelLEDPin1, HIGH);
-      digitalWrite(SpeedLevelLEDPin2, HIGH);
-      digitalWrite(SpeedLevelLEDPin3, HIGH);
+      digitalWrite(GearLEDPin0, HIGH);
+      digitalWrite(GearLEDPin1, HIGH);
+      digitalWrite(GearLEDPin2, HIGH);
+      digitalWrite(GearLEDPin3, HIGH);
       break;
     default:
       // Speed level error

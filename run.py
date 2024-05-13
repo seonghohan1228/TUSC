@@ -122,8 +122,8 @@ class TUSC:
 	def __init__(self):
 		# Setup Pi and actuators
 		self.pi = pigpio.pi()
-		self.gear_level = 1
-		self.set_scalar(self.gear_level)
+		self.gear = 1
+		self.set_scalar(self.gear)
 		self.lin_act = LinearActuator(self.pi, self.LIN_ACT_IN_1_PIN, \
 								  self.LIN_ACT_IN_2_PIN)
 		self.bldc_L = BLDC(self.pi, self.PWM_PIN_L, \
@@ -134,19 +134,19 @@ class TUSC:
 		self.mode = STEER
 	
 	def upshift(self):
-		self.gear_level += 1
-		if self.gear_level > len(self.SCALARS):
-			self.gear_level = len(self.SCALARS)
-		self.set_scalar(self.gear_level)
+		self.gear += 1
+		if self.gear > len(self.SCALARS):
+			self.gear = len(self.SCALARS)
+		self.set_scalar(self.gear)
 	
 	def downshift(self):
-		self.gear_level -= 1
-		if self.gear_level < 1:
-			self.gear_level = 1
-		self.set_scalar(self.gear_level)
+		self.gear -= 1
+		if self.gear < 1:
+			self.gear = 1
+		self.set_scalar(self.gear)
 	
-	def set_scalar(self, gear_level):
-		self.scalar = self.SCALARS[gear_level - 1]
+	def set_scalar(self, gear):
+		self.scalar = self.SCALARS[gear - 1]
 	
 	def trim(self, dir):
 		# Lower left motor PWM so robot steers to the left
@@ -235,7 +235,7 @@ def main():
 				axis_value_R = -joystick.get_axis(3)  # Right joystick y
 			
 			tusc.set_speed(axis_value_L, axis_value_R)
-			ser.write(struct.pack('>BBBB', tusc.mode, tusc.gear_level, int(tusc.bldc_L.speed) + 100, int(tusc.bldc_R.speed) + 100))
+			ser.write(struct.pack('>BBBB', tusc.mode, tusc.gear, int(tusc.bldc_L.speed) + 100, int(tusc.bldc_R.speed) + 100))
 			
             # Handle Pygame events
 			events = pygame.event.get()
