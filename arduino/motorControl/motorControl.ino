@@ -3,7 +3,7 @@
 int ESCPin_L = 9;
 int ESCPin_R = 10;
 
-// Pulsewidth units are in ms
+// Pulsewidths (unit: us)
 int MIN_PULSEWIDTH = 1000;
 int IDLE_PULSEWIDTH = 1500;
 int MAX_PULSEWIDTH = 2000;
