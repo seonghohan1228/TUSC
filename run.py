@@ -11,6 +11,9 @@ UP = 1
 LOW = 0
 HIGH = 1
 
+STEER = 0
+TANK = 1
+
 
 ps4_buttons = {
 	"cross": 0,
@@ -128,7 +131,7 @@ class TUSC:
 		self.bldc_R = BLDC(self.pi, self.PWM_PIN_R, \
 					 scalar=self.scalar, trim=0)
 		self.sensitivity = self.DEFAULT_SENSITIVITY
-		self.mode = "steer"
+		self.mode = STEER
 	
 	def upshift(self):
 		self.gear += 1
@@ -168,10 +171,10 @@ class TUSC:
 		self.bldc_R.trim = 0
 
 	def set_speed(self, input_L, input_R):
-		if self.mode == "tank":
+		if self.mode == TANK:
 			mapped_input_L = input_L
 			mapped_input_R = input_R
-		if self.mode == "steer":
+		if self.mode == STEER:
 			mapped_input_L = input_L + self.sensitivity * input_R
 			mapped_input_R = input_L - self.sensitivity * input_R
 			if mapped_input_L < -1:
@@ -197,10 +200,10 @@ class TUSC:
 			self.sensitivity = 0.1
 	
 	def switch_mode(self):
-		if self.mode == "steer":
-			self.mode = "tank"
-		elif self.mode == "tank":
-			self.mode = "steer"
+		if self.mode == STEER:
+			self.mode = TANK
+		elif self.mode == TANK:
+			self.mode = STEER
 
 
 def main():
@@ -226,9 +229,9 @@ def main():
 		while True:
 			# Get joystick angle (negative is forward)
 			axis_value_L = -joystick.get_axis(1)
-			if tusc.mode == "steer":
+			if tusc.mode == STEER:
 				axis_value_R = joystick.get_axis(2)  # Right joystick x
-			elif tusc.mode == "tank":
+			elif tusc.mode == TANK:
 				axis_value_R = -joystick.get_axis(3)  # Right joystick y
 			
 			tusc.set_speed(axis_value_L, axis_value_R)
