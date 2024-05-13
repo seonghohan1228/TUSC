@@ -115,7 +115,7 @@ class TUSC:
 	LIN_ACT_IN_2_PIN = 27
 	PWM_PIN_L = 13
 	PWM_PIN_R = 12
-	SCALARS = [10, 15, 20, 40, 80]
+	SCALARS = [20, 40, 60, 80]
 	LIN_ACT_COUNT = 100
 	DEFAULT_SENSITIVITY = 0.2
 
@@ -235,7 +235,7 @@ def main():
 				axis_value_R = -joystick.get_axis(3)  # Right joystick y
 			
 			tusc.set_speed(axis_value_L, axis_value_R)
-			ser.write(struct.pack('>BB', int(tusc.bldc_L.speed) + 100, int(tusc.bldc_R.speed) + 100))
+			ser.write(struct.pack('>BBBB', tusc.mode, tusc.gear, int(tusc.bldc_L.speed) + 100, int(tusc.bldc_R.speed) + 100))
 			
             # Handle Pygame events
 			events = pygame.event.get()
