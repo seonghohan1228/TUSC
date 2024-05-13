@@ -332,8 +332,7 @@ def main():
 					
 					## Mode
 					if joystick.get_button(ps4_buttons["touchpad"]):
-						pass
-						# tusc.switch_mode()
+						tusc.switch_mode()
 
 			if tusc.lin_act.joystick_control == False:
 				tusc.lin_act.counter += 1
