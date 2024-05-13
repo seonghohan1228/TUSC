@@ -204,17 +204,22 @@ class TUSC:
 			# mapped_input_R = input_R
 			# (x,y) = (steer_LR, steer_UD)
 
+			
 			interval = 0.3
-			angle = 2. * math.atan2(-steer_LR, steer_UD)/ math.pi
+			forward = True if steer_UD >= 0 else False
+			angle = 2. * math.atan2(steer_LR, -steer_UD)/math.pi if forward else 2. * math.atan2(-steer_LR, steer_UD)/math.pi
+			#forward = True if (angle >= 0 and angle < math.pi/2) or (angle < 0 and angle > -math.pi/2) else False
 			
-			forward = True if (angle >= 0 and angle < math.pi/2) or (angle < 0 and angle > -math.pi/2) else False
 
-			mapped_input_L = input - interval*angle if angle<0 else min(1., input + interval*angle)
-			mapped_input_R = min(1., input + interval*angle) if angle<0 else input - interval*angle
+			# mapped_input_L = max(-1, input - interval*angle) if angle<0 else min(1., input + interval*angle)
+			# mapped_input_R = min(1., input + interval*angle) if angle<0 else max(-1, input - interval*angle)
+
+			mapped_input_L = max(1., min(1. ,input + (-interval*angle if angle<0 else interval*angle) * (1 if forward else -1)))
+			mapped_input_R = max(1., min(1. ,input + (+interval*angle if angle<0 else -interval*angle) * (1 if forward else -1)))
 			
-			if not forward:
-				mapped_input_L *= -1
-				mapped_input_R *= -1
+			# if not forward:
+			# 	mapped_input_L *= -1
+			# 	mapped_input_R *= -1
 
 			# forward = True
 			# if angle > 1 or angle < -1:
