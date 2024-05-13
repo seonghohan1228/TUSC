@@ -7,15 +7,15 @@ int ESCPin_R = 10;
 int MIN_PULSEWIDTH = 1000;
 int IDLE_PULSEWIDTH = 1500;
 int MAX_PULSEWIDTH = 2000;
-int DEADBAND = 5;
 
-int inputSpeed[2];
+int incoming[3];
 
 int servoValue_L;
 int servoValue_R;
 
 Servo ESC_L;    // Create servo object to control the ESC
 Servo ESC_R;
+
 
 void setup()
 {
@@ -27,27 +27,19 @@ void setup()
 
 }
 
+
 void loop()
 {
-  if (Serial.available() >= 2) {
-    for (int i = 0; i < 2; i++){
-      inputSpeed[i] = Serial.read();
-      inputSpeed[i] -= 100;  // To fit range of 0~255
+  if (Serial.available() >= 3) {
+    for (int i = 0; i < 3; i++){
+      incoming[i] = Serial.read();
     }
   }
-  //int brightness = map(inputSpeed[0], -100, 100, 0, 255);
-  //analogWrite(5, brightness);
+  int gear = incoming[0];
+  int speed_L = incoming[1] - 100;  // Speed was shifted +100 when sending from Pi (0~200)
+  int speed_R = incoming[2] - 100;
   
-  ESC_L.write(map(inputSpeed[0], -100, 100, 0, 180));
-  ESC_R.write(map(inputSpeed[1], -100, 100, 0, 180));
+  ESC_L.write(map(speed_L, -100, 100, 0, 180));
+  ESC_R.write(map(speed_R, -100, 100, 0, 180));
 }
 
-
-void printValues(int value_L, int value_R)
-{
-  Serial.print("L: ");
-  Serial.print(value_L);
-  Serial.print("\t");
-  Serial.print("R: ");
-  Serial.println(value_R);
-}
