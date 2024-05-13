@@ -113,7 +113,7 @@ class TUSC:
 	PWM_PIN_L = 13
 	PWM_PIN_R = 12
 	SCALARS = [10, 15, 20, 40, 80]
-	LIN_ACT_COUNT = 1000
+	LIN_ACT_COUNT = 100
 	DEFAULT_SENSITIVITY = 0.2
 
 	def __init__(self):
@@ -204,7 +204,7 @@ class TUSC:
 
 
 def main():
-	ser = serial.Serial('/dev/ttyS0', 9600, timeout=1)
+	ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 	# Initialize Pygame and the joystick module
 	pygame.init()
 	pygame.joystick.init()
