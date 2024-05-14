@@ -182,17 +182,16 @@ class TUSC:
 
 	def set_speed(self,input, steer_UD=None, steer_LR=None):
 
-		if steer_UD == None or steer_LR == None:
+		if steer_UD == None and steer_LR == None:
 			self.bldc_L.set_speed(input, self.scalar)
 			self.bldc_R.set_speed(input, self.scalar)
 			return
-		
 		
 		# if self.mode == "tank":
 		# 	mapped_input_L = input_L
 		# 	mapped_input_R = input_R
 		
-		if self.mode == "steer":
+		if self.mode == STEER:
 			mapped_input_L = steer_UD
 			mapped_input_R = steer_LR
 			# mapped_input_L = steer_UD + self.sensitivity * steer_LR
@@ -206,7 +205,7 @@ class TUSC:
 			# if mapped_input_R > 1:
 			# 	mapped_input_R = 1
 		
-		if self.mode == "tank":
+		if self.mode == TANK:
 			# mapped_input_L = input_L
 			# mapped_input_R = input_R
 			# (x,y) = (steer_LR, steer_UD)
@@ -230,7 +229,8 @@ class TUSC:
 			mapped_input_R = max(-1., min(1. ,input + (+interval*angle) ))
 			
 
-					
+		print(f"mapped_intput_L: {mapped_input_L}")
+		print(f"mapped_input_R: {mapped_input_R}")
 		self.bldc_L.set_speed(mapped_input_L, self.scalar)
 		self.bldc_R.set_speed(mapped_input_R, self.scalar)
 	
@@ -280,14 +280,14 @@ def main():
 			axis_value_L = None
 			axis_value_R = None
 
-			if tusc.mode == "steer":
+			if tusc.mode == STEER:
 				speed_input = None
 				axis_value_L = -joystick.get_axis(1)
 				axis_value_R = joystick.get_axis(3)  # Right joystick x
 				
-			elif tusc.mode == "tank":
+			elif tusc.mode == TANK:
 				axis_value_UD = -joystick.get_axis(ps4_axes["l_stick_v"])
-				axis_value_LR = -joystick.get_axis(ps4_axes["l_stick_h"])  # Right joystick y
+				axis_value_LR = joystick.get_axis(ps4_axes["l_stick_h"])  # Right joystick y
 				l2_trigger = (joystick.get_axis(ps4_axes["l2_trigger"]) + 1.0) /2.
 				r2_trigger = (joystick.get_axis(ps4_axes["r2_trigger"]) + 1.0) /2.
 			
