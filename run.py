@@ -190,16 +190,18 @@ class TUSC:
 		# 	mapped_input_R = input_R
 		
 		if self.mode == "steer":
-			mapped_input_L = steer_UD + self.sensitivity * steer_LR
-			mapped_input_R = steer_UD - self.sensitivity * steer_LR
-			if mapped_input_L < -1:
-				mapped_input_L = -1
-			if mapped_input_R < -1:
-				mapped_input_R = -1
-			if mapped_input_L > 1:
-				mapped_input_L = 1
-			if mapped_input_R > 1:
-				mapped_input_R = 1
+			mapped_input_L = steer_UD
+			mapped_input_R = steer_LR
+			# mapped_input_L = steer_UD + self.sensitivity * steer_LR
+			# mapped_input_R = steer_UD - self.sensitivity * steer_LR
+			# if mapped_input_L < -1:
+			# 	mapped_input_L = -1
+			# if mapped_input_R < -1:
+			# 	mapped_input_R = -1
+			# if mapped_input_L > 1:
+			# 	mapped_input_L = 1
+			# if mapped_input_R > 1:
+			# 	mapped_input_R = 1
 		
 		if self.mode == "tank":
 			# mapped_input_L = input_L
@@ -207,7 +209,7 @@ class TUSC:
 			# (x,y) = (steer_LR, steer_UD)
 
 			
-			interval = 0.3
+			interval = 0.5
 			forward = True if steer_UD >= 0 else False
 			
 			if steer_LR**2 + steer_UD**2 > 0.5**2:
@@ -218,8 +220,11 @@ class TUSC:
 			# mapped_input_L = max(-1., min(1. ,input + (-interval*angle if angle<0 else interval*angle) * (1 if forward else -1)))
 			# mapped_input_R = max(-1., min(1. ,input + (+interval*angle if angle<0 else -interval*angle) * (1 if forward else -1)))
 
-			mapped_input_L = max(-1., min(1. ,input + (-interval*angle) * (1 if forward else -1)))
-			mapped_input_R = max(-1., min(1. ,input + (+interval*angle) * (1 if forward else -1)))
+			# mapped_input_L = max(-1., min(1. ,input + (-interval*angle) * (1 if forward else -1)))
+			# mapped_input_R = max(-1., min(1. ,input + (+interval*angle) * (1 if forward else -1)))
+
+			mapped_input_L = max(-1., min(1. ,input + (-interval*angle) ))
+			mapped_input_R = max(-1., min(1. ,input + (+interval*angle) ))
 			
 
 					
@@ -275,7 +280,7 @@ def main():
 			if tusc.mode == "steer":
 				speed_input = None
 				axis_value_L = -joystick.get_axis(1)
-				axis_value_R = joystick.get_axis(2)  # Right joystick x
+				axis_value_R = joystick.get_axis(3)  # Right joystick x
 				
 			elif tusc.mode == "tank":
 				axis_value_UD = -joystick.get_axis(ps4_axes["l_stick_v"])
@@ -320,7 +325,7 @@ def main():
 						tusc.lin_act.joystick_control = False
 
 					# Flipper switches direction if L stick is pressed
-					if joystick.get_button(ps4_buttons["L stick in"]):
+					if joystick.get_button(ps4_buttons["R stick in"]):
 						# If linear actuator has stopped, set to extend
 						if tusc.lin_act.in_1_val == LOW and tusc.lin_act.in_2_val == LOW:
 							tusc.lin_act.extend()
