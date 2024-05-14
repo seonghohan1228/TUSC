@@ -20,7 +20,7 @@ int MIN_PULSEWIDTH = 1000;
 int IDLE_PULSEWIDTH = 1500;
 int MAX_PULSEWIDTH = 2000;
 
-int incoming[3];
+int incoming[4];
 
 int servoValue_L;
 int servoValue_R;
@@ -57,13 +57,12 @@ void loop()
     int gear = incoming[1];
     int speed_L = incoming[2] - 100;  // Speed was shifted +100 when sending from Pi (0~200)
     int speed_R = incoming[3] - 100;
-    
+
     LED_control(mode, gear);
 
     ESC_L.write(map(speed_L, -100, 100, 0, 180));
     ESC_R.write(map(speed_R, -100, 100, 0, 180));
   }
-  
 }
 
 
