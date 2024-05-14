@@ -12,6 +12,9 @@ UP = 1
 LOW = 0
 HIGH = 1
 
+STEER = 0
+TANK = 1
+
 
 ps4_buttons = {
 	"cross": 0,
@@ -122,8 +125,8 @@ class TUSC:
 	LIN_ACT_IN_2_PIN = 27
 	PWM_PIN_L = 13
 	PWM_PIN_R = 12
-	SCALARS = [10, 15, 20, 40, 80]
-	LIN_ACT_COUNT = 1000
+	SCALARS = [20, 40, 60, 80]
+	LIN_ACT_COUNT = 100
 	DEFAULT_SENSITIVITY = 0.2
 
 	def __init__(self):
@@ -138,7 +141,7 @@ class TUSC:
 		self.bldc_R = BLDC(self.pi, self.PWM_PIN_R, \
 					 scalar=self.scalar, trim=0)
 		self.sensitivity = self.DEFAULT_SENSITIVITY
-		self.mode = "steer"
+		self.mode = STEER
 	
 	def upshift(self):
 		self.gear += 1
@@ -242,10 +245,10 @@ class TUSC:
 			self.sensitivity = 0.1
 	
 	def switch_mode(self):
-		if self.mode == "steer":
-			self.mode = "tank"
-		elif self.mode == "tank":
-			self.mode = "steer"
+		if self.mode == STEER:
+			self.mode = TANK
+		elif self.mode == TANK:
+			self.mode = STEER
 
 
 def main():
