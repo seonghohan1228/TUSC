@@ -235,7 +235,7 @@ def main():
 			# Receive data packet and check validity
 			incoming_packet = IncomingPacket(ser)
 			incoming_packet.receive()
-			if incoming_packet.is_valid:
+			if incoming_packet.is_valid():
 				incoming_packet.print()
 			
             # Handle Pygame events
