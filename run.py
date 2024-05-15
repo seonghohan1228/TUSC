@@ -3,6 +3,7 @@ import pygame
 import time
 import serial
 import struct
+from packet import Packet
 
 
 DOWN = 0
@@ -81,9 +82,7 @@ class BLDC:
 	IDLE_PULSEWIDTH = 1500
 	MAX_PULSEWIDTH = 2000
 
-	def __init__(self, pi, pwm_pin, scalar=10, trim=0):
-		self.pi = pi
-		self.pwm_pin = pwm_pin
+	def __init__(self, scalar=10, trim=0):
 		self.input = 0
 		self.speed = 0  # 0 ~ 100
 		self.scalar = scalar  # Percent of Max. PWM
@@ -102,12 +101,6 @@ class BLDC:
 	def set_speed(self, input, scalar):
 		self.scalar = scalar
 		self.speed = (self.scalar / 100) * input * (100 + self.trim)
-		self.set_pwm()
-
-	def set_pwm(self):
-		pulsewidth = (self.MAX_PULSEWIDTH - self.IDLE_PULSEWIDTH) * \
-					 (self.speed / 100) + self.IDLE_PULSEWIDTH
-		self.pi.set_servo_pulsewidth(self.pwm_pin, pulsewidth)
 
 
 class TUSC:
@@ -126,10 +119,8 @@ class TUSC:
 		self.set_scalar(self.gear)
 		self.lin_act = LinearActuator(self.pi, self.LIN_ACT_IN_1_PIN, \
 								  self.LIN_ACT_IN_2_PIN)
-		self.bldc_L = BLDC(self.pi, self.PWM_PIN_L, \
-					 scalar=self.scalar, trim=0)
-		self.bldc_R = BLDC(self.pi, self.PWM_PIN_R, \
-					 scalar=self.scalar, trim=0)
+		self.bldc_L = BLDC(scalar=self.scalar, trim=0)
+		self.bldc_R = BLDC(scalar=self.scalar, trim=0)
 		self.sensitivity = self.DEFAULT_SENSITIVITY
 		self.mode = STEER
 	
@@ -235,11 +226,28 @@ def main():
 				axis_value_R = -joystick.get_axis(3)  # Right joystick y
 			
 			tusc.set_speed(axis_value_L, axis_value_R)
-			ser.write(struct.pack('>BBBB', tusc.mode, tusc.gear, int(tusc.bldc_L.speed) + 100, int(tusc.bldc_R.speed) + 100))
+
+			# Create and send data packet
+			packet = Packet(ser)
+			packet.create(tusc.mode, tusc.gear, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
+			packet.send()
 			
             # Handle Pygame events
 			events = pygame.event.get()
 			for event in events:
+				# Joystick disconnected
+				if event.type == pygame.JOYDEVICEREMOVED:
+					print("Joystick disconnected.")
+					print("Quiting...")
+					tusc.set_speed(0, 0)
+					tusc.mode = STEER
+					tusc.gear = 1
+					packet.create(tusc.mode, tusc.gear, 0, 0)
+					packet.send()
+					tusc.pi.stop()
+					pygame.quit()
+					exit()
+
 				# Button pressed
 				if event.type == pygame.JOYBUTTONDOWN:
 					print("Button pressed.")
@@ -252,7 +260,8 @@ def main():
 						tusc.set_speed(0, 0)
 						tusc.mode = STEER
 						tusc.gear = 1
-						ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
+						packet.create(tusc.mode, tusc.gear, 0, 0)
+						packet.send()
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -320,7 +329,8 @@ def main():
 		tusc.set_speed(0, 0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
+		packet.create(tusc.mode, tusc.gear, 0, 0)
+		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
 
@@ -328,7 +338,8 @@ def main():
 		tusc.set_speed(0, 0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
+		packet.create(tusc.mode, tusc.gear, 0, 0)
+		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
 

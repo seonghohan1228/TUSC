@@ -20,7 +20,10 @@ int MIN_PULSEWIDTH = 1000;
 int IDLE_PULSEWIDTH = 1500;
 int MAX_PULSEWIDTH = 2000;
 
-int incoming[4];
+// Packet info
+const byte START_BYTE = 0x02;
+const byte END_BYTE = 0x03;
+const int PACKET_SIZE = 9;
 
 int servoValue_L;
 int servoValue_R;
@@ -29,40 +32,14 @@ Servo ESC_L;    // Create servo object to control the ESC
 Servo ESC_R;
 
 
-void setup()
+uint8_t calculate_checksum(uint8_t data[], int length)
 {
-  Serial.begin(9600);
-  // LED pins
-  pinMode(ModeLEDPin0, OUTPUT);
-  pinMode(ModeLEDPin1, OUTPUT);
-  pinMode(GearLEDPin0, OUTPUT);
-  pinMode(GearLEDPin1, OUTPUT);
-  pinMode(GearLEDPin2, OUTPUT);
-  pinMode(GearLEDPin3, OUTPUT);
-
-  // PWM pins for ESCs
-  ESC_L.attach(ESCPin_L, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
-  ESC_R.attach(ESCPin_R, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
-}
-
-
-void loop()
-{
-  if (Serial.available() >= 4) {
-    for (int i = 0; i < 4; i++){
-      incoming[i] = Serial.read();
-    }
-
-    int mode = incoming[0];
-    int gear = incoming[1];
-    int speed_L = incoming[2] - 100;  // Speed was shifted +100 when sending from Pi (0~200)
-    int speed_R = incoming[3] - 100;
-
-    LED_control(mode, gear);
-
-    ESC_L.write(map(speed_L, -100, 100, 0, 180));
-    ESC_R.write(map(speed_R, -100, 100, 0, 180));
+  uint8_t checksum = 0;
+  for (int i = 0; i < length; i++)
+  {
+    checksum += data[i];
   }
+  return checksum % 256;
 }
 
 
@@ -113,4 +90,75 @@ void LED_control(int mode, int gear)
       break;
   }
 }
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+void setup()
+{
+  Serial.begin(9600);
+  // LED pins
+  pinMode(ModeLEDPin0, OUTPUT);
+  pinMode(ModeLEDPin1, OUTPUT);
+  pinMode(GearLEDPin0, OUTPUT);
+  pinMode(GearLEDPin1, OUTPUT);
+  pinMode(GearLEDPin2, OUTPUT);
+  pinMode(GearLEDPin3, OUTPUT);
+
+  // PWM pins for ESCs
+  ESC_L.attach(ESCPin_L, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
+  ESC_R.attach(ESCPin_R, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
+}
+
+
+void loop()
+{
+  static byte buffer[PACKET_SIZE];
+  static int buffer_index = 0;
+
+  while (Serial.available())
+  {
+    byte incoming_byte = Serial.read();
+
+    if (buffer_index == 0)
+    {
+      if (incoming_byte == START_BYTE)
+      {
+        buffer[buffer_index++] = incoming_byte;
+      }
+    }
+    else
+    {
+      buffer[buffer_index++] = incoming_byte;
+      if (buffer_index == PACKET_SIZE)
+      {
+        // Read incoming bytes
+        byte received[PACKET_SIZE];
+        Serial.readBytes(received, PACKET_SIZE);
+        // Check validity of packet
+        if (received[0] == START_BYTE && received[PACKET_SIZE - 1] == END_BYTE)
+        {
+          byte mode = received[1];
+          byte gear = received[2];
+          int16_t speed_L = (received[3] << 8) | received[4];  // Higher byte | Lower byte
+          int16_t speed_R = (received[5] << 8) | received[6];
+
+          byte payload[] = { mode, gear, received[3], received[4], received[5], received[6] };
+
+          // If checksum is correct, act
+          byte checksum = calculate_checksum(payload, 6);
+          if (checksum == received[7])
+          {
+            LED_control(mode, gear);
+
+            ESC_L.write(map(speed_L, -100, 100, 0, 180));
+            ESC_R.write(map(speed_R, -100, 100, 0, 180));
+          }
+        }
+        buffer_index = 0;
+      }
+    }
+  }
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
