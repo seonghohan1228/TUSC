@@ -252,7 +252,6 @@ class TUSC:
 
 
 def main():
-	ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 	# Initialize Pygame and the joystick module
 	pygame.init()
 	pygame.joystick.init()
@@ -268,6 +267,7 @@ def main():
 
 	# Run TUSC
 	try:
+		ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 		tusc = TUSC()
 		
 		# Main loop
@@ -295,7 +295,7 @@ def main():
 			
 			# tusc.set_speed(axis_value_L, axis_value_R)
 			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R) 
-			ser.write(struct.pack('>BB', int(tusc.bldc_L.speed) + 100, int(tusc.bldc_R.speed) + 100))
+			ser.write(struct.pack('>BBBB', tusc.mode, tusc.gear, int(tusc.bldc_L.speed) + 100, int(tusc.bldc_R.speed) + 100))
 
             # Handle Pygame events
 			events = pygame.event.get()
@@ -309,9 +309,10 @@ def main():
 						print()
 						print("Software Kill Switch triggered.")
 						print("Quiting...")
-						# tusc.set_speed(0, 0)
 						tusc.set_speed(0)
-						ser.write(struct.pack('>BB', 0 + 100, 0 + 100))
+						tusc.mode = STEER
+						tusc.gear = 1
+						ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -376,16 +377,18 @@ def main():
 
 	except KeyboardInterrupt:
 		print("Keyboard interrupt")
-		ser.write(struct.pack('>BB', 0 + 100, 0 + 100))
-		# tusc.set_speed(0, 0)
 		tusc.set_speed(0)
+		tusc.mode = STEER
+		tusc.gear = 1
+		ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
 		tusc.pi.stop()
 		pygame.quit()
 
 	finally:
-		# tusc.set_speed(0, 0)
 		tusc.set_speed(0)
-		ser.write(struct.pack('>BB', 0 + 100, 0 + 100))
+		tusc.mode = STEER
+		tusc.gear = 1
+		ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
 		tusc.pi.stop()
 		pygame.quit()
 
