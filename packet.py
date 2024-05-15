@@ -11,7 +11,7 @@ class Packet:
     END_BYTE = 0x03
     LENGTH = 10  # bytes
     PAYLOAD_STRUCTURE = ">BBhh"
-    PACKET_STRUCTURE = ">B7sB"
+    PACKET_STRUCTURE = ">B7sBB"
 
 
 class OutgoingPacket(Packet):
