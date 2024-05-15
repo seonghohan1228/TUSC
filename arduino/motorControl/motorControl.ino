@@ -23,7 +23,7 @@ int MAX_PULSEWIDTH = 2000;
 // Packet info
 const byte START_BYTE = 0x02;
 const byte END_BYTE = 0x03;
-const int PACKET_SIZE = 10;
+const int PACKET_SIZE = 9;
 
 int servoValue_L;
 int servoValue_R;
@@ -40,29 +40,6 @@ uint8_t calculate_checksum(uint8_t data[], int length)
     checksum += data[i];
   }
   return checksum % 256;
-}
-
-
-void send_packet(uint8_t mode, uint8_t gear, int16_t speed_L, int16_t speed_R)
-{
-  uint8_t payload[6];
-  payload[0] = mode;
-  payload[1] = gear;
-  payload[2] = highByte(speed_L);
-  payload[3] = lowByte(speed_L);
-  payload[4] = highByte(speed_R);
-  payload[5] = lowByte(speed_R);
-  uint8_t checksum = calculate_checksum(payload, 6);
-  
-  uint8_t packet[PACKET_SIZE];
-  packet[0] = START_BYTE;
-  for (int i = 0; i < 6; i++)
-  {
-    packet[1 + i] = payload[i];
-  }
-  packet[7] = checksum;
-  packet[8] = END_BYTE;
-  Serial.write(packet, PACKET_SIZE);
 }
 
 
@@ -135,31 +112,50 @@ void setup()
 
 void loop()
 {
-  if (Serial.available() >= PACKET_SIZE)
+  static byte buffer[PACKET_SIZE];
+  static int buffer_index = 0;
+
+  while (Serial.available())
   {
-    // Read incoming bytes
-    byte received[PACKET_SIZE];
-    Serial.readBytes(received, PACKET_SIZE);
+    byte incoming_byte = Serial.read();
 
-    // Check validity of packet
-    if (received[0] == START_BYTE && received[PACKET_SIZE - 1] == END_BYTE)
+    if (buffer_index == 0)
     {
-      byte mode = received[1];
-      byte gear = received[2];
-      int16_t speed_L = (received[3] << 8) | received[4];  // Higher byte | Lower byte
-      int16_t speed_R = (received[5] << 8) | received[6];
+      if (incoming_byte == START_BYTE)
+      {
+        buffer[buffer_index++] = incoming_byte;
+      }
+    }
+    else
+    {
+      buffer[buffer_index++] = incoming_byte;
+      if (buffer_index == PACKET_SIZE)
+      {
+        // Read incoming bytes
+        byte received[PACKET_SIZE];
+        Serial.readBytes(received, PACKET_SIZE);
+        // Check validity of packet
+        if (received[0] == START_BYTE && received[PACKET_SIZE - 1] == END_BYTE)
+        {
+          byte mode = received[1];
+          byte gear = received[2];
+          int16_t speed_L = (received[3] << 8) | received[4];  // Higher byte | Lower byte
+          int16_t speed_R = (received[5] << 8) | received[6];
 
-      byte payload[] = { mode, gear, received[3], received[4], received[5], received[6] };
+          byte payload[] = { mode, gear, received[3], received[4], received[5], received[6] };
 
-      // If checksum is correct, send the data back to sender (debug purpose)
-      byte checksum = calculate_checksum(payload, 6);
-      if (checksum == received[7])
-        send_packet(mode, gear, speed_L, speed_R);
-      
-      LED_control(mode, gear);
+          // If checksum is correct, act
+          byte checksum = calculate_checksum(payload, 6);
+          if (checksum == received[7])
+          {
+            LED_control(mode, gear);
 
-      ESC_L.write(map(speed_L, -100, 100, 0, 180));
-      ESC_R.write(map(speed_R, -100, 100, 0, 180));
+            ESC_L.write(map(speed_L, -100, 100, 0, 180));
+            ESC_R.write(map(speed_R, -100, 100, 0, 180));
+          }
+        }
+        buffer_index = 0;
+      }
     }
   }
 }

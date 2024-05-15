@@ -9,12 +9,10 @@ class Packet:
     # Define start and end bytes
     START_BYTE = 0x02
     END_BYTE = 0x03
-    LENGTH = 10  # bytes
+    LENGTH = 9  # bytes
     PAYLOAD_STRUCTURE = ">BBhh"
-    PACKET_STRUCTURE = ">B7sBB"
+    PACKET_STRUCTURE = ">B6sBB"
 
-
-class OutgoingPacket(Packet):
     def __init__(self, serial_connection):
         self.serial_connection = serial_connection
     
@@ -33,32 +31,4 @@ class OutgoingPacket(Packet):
     
     def print(self):
         print(f"Sended: {self.mode}\t{self.gear}\t{self.speed_L}\t{self.speed_R}")
-
-
-class IncomingPacket(Packet):
-    def __init__(self, serial_connection):
-        self.serial_connection = serial_connection
-    
-    def receive(self):
-        self.bytes = self.serial_connection.read_until(bytes([self.END_BYTE]))
-
-    def is_valid(self):
-        if len(self.bytes) != 10:
-            return False
-        self.start_byte, self.mode, self.gear, self.speed_L, self.speed_R, self.checksum, self.end_byte = struct.unpack(self.PACKET_STRUCTURE, self.bytes)
-        
-        # Check start and end byte
-        if self.start_byte != self.START_BYTE or self.end_byte != self.END_BYTE:
-            return False
-        
-        # Check payload
-        payload = self.bytes[1:8]
-        if calculate_checksum(payload) != self.checksum:
-            return False
-        
-        return True
-
-    def print(self):
-        print(f"Received: {self.mode}\t{self.gear}\t{self.speed_L}\t{self.speed_R}")
-
 

@@ -3,7 +3,7 @@ import pygame
 import time
 import serial
 import struct
-from packet import IncomingPacket, OutgoingPacket
+from packet import Packet
 
 
 DOWN = 0
@@ -228,15 +228,9 @@ def main():
 			tusc.set_speed(axis_value_L, axis_value_R)
 
 			# Create and send data packet
-			outgoing_packet = OutgoingPacket(ser)
-			outgoing_packet.create(tusc.mode, tusc.gear, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
-			outgoing_packet.send()
-    
-			# Receive data packet and check validity
-			incoming_packet = IncomingPacket(ser)
-			incoming_packet.receive()
-			if incoming_packet.is_valid():
-				incoming_packet.print()
+			packet = Packet(ser)
+			packet.create(tusc.mode, tusc.gear, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
+			packet.send()
 			
             # Handle Pygame events
 			events = pygame.event.get()
@@ -253,7 +247,8 @@ def main():
 						tusc.set_speed(0, 0)
 						tusc.mode = STEER
 						tusc.gear = 1
-						ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
+						packet.create(tusc.mode, tusc.gear, 0, 0)
+						packet.send()
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -321,7 +316,8 @@ def main():
 		tusc.set_speed(0, 0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
+		packet.create(tusc.mode, tusc.gear, 0, 0)
+		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
 
@@ -329,7 +325,8 @@ def main():
 		tusc.set_speed(0, 0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		ser.write(struct.pack('>BBBB',tusc.mode, tusc.gear, 0 + 100, 0 + 100))
+		packet.create(tusc.mode, tusc.gear, 0, 0)
+		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
 
