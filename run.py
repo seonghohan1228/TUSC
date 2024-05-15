@@ -235,6 +235,19 @@ def main():
             # Handle Pygame events
 			events = pygame.event.get()
 			for event in events:
+				# Joystick disconnected
+				if event.type == pygame.JOYDEVICEREMOVED:
+					print("Joystick disconnected.")
+					print("Quiting...")
+					tusc.set_speed(0, 0)
+					tusc.mode = STEER
+					tusc.gear = 1
+					packet.create(tusc.mode, tusc.gear, 0, 0)
+					packet.send()
+					tusc.pi.stop()
+					pygame.quit()
+					exit()
+
 				# Button pressed
 				if event.type == pygame.JOYBUTTONDOWN:
 					print("Button pressed.")
