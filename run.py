@@ -192,8 +192,8 @@ class TUSC:
 		# 	mapped_input_R = input_R
 		
 		if self.mode == STEER:
-			mapped_input_L = steer_UD
-			mapped_input_R = steer_LR
+			mapped_input_L = steer_LR
+			mapped_input_R = -steer_UD
 			# mapped_input_L = steer_UD + self.sensitivity * steer_LR
 			# mapped_input_R = steer_UD - self.sensitivity * steer_LR
 			# if mapped_input_L < -1:
@@ -225,8 +225,8 @@ class TUSC:
 			# mapped_input_L = max(-1., min(1. ,input + (-interval*angle) * (1 if forward else -1)))
 			# mapped_input_R = max(-1., min(1. ,input + (+interval*angle) * (1 if forward else -1)))
 
-			mapped_input_L = max(-1., min(1. ,input + (-interval*angle) ))
-			mapped_input_R = max(-1., min(1. ,input + (+interval*angle) ))
+			mapped_input_L = max(-1., min(1. ,input + (-interval*angle*self.sensitivity) ))
+			mapped_input_R = max(-1., min(1. ,input + (+interval*angle*self.sensitivity) ))
 			
 
 		print(f"mapped_intput_L: {mapped_input_L}")
@@ -235,14 +235,14 @@ class TUSC:
 		self.bldc_R.set_speed(mapped_input_R, self.scalar)
 	
 	def increase_sensitivity(self):
-		self.sensitivity += 0.1
+		self.sensitivity += 0.2
 		if self.sensitivity >= 1:
 			self.sensitivity = 1
 			
 	def decrease_sensitivity(self):
-		self.sensitivity -= 0.1
-		if self.sensitivity <= 0.1:
-			self.sensitivity = 0.1
+		self.sensitivity -= 0.2
+		if self.sensitivity <= 0.2:
+			self.sensitivity = 0.2
 	
 	def switch_mode(self):
 		if self.mode == STEER:
