@@ -328,7 +328,20 @@ def main():
 						tusc.lin_act.counter = 0  # Reset counter
 						tusc.lin_act.joystick_control = False
 
-					# Flipper switches direction if L stick is pressed
+					# ********** New Function for Flipper **********
+
+					# Flipper goes up
+					if tusc.mode == TANK:
+						up_down_flipper = joystick.get_axis(ps4_axes["l_stick_h"])
+
+						if up_down_flipper > 0.5:
+							tusc.lin_act.retract()
+						elif up_down_flipper < -0.5:
+							tusc.lin_act.extend()
+
+					# ********** New Function for Flipper **********
+
+					# Flipper switches direction if R stick is pressed
 					if joystick.get_button(ps4_buttons["R stick in"]):
 						# If linear actuator has stopped, set to extend
 						if tusc.lin_act.in_1_val == LOW and tusc.lin_act.in_2_val == LOW:
