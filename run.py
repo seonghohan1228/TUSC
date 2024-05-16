@@ -369,15 +369,15 @@ def main():
 
 			# ********** New Function for Flipper **********
 
-					# Flipper goes up
-					if tusc.mode == TANK:
-						up_down_flipper = joystick.get_axis(ps4_axes["r_stick_v"])
-						print(f"up_down : {up_down_flipper}")
+			# Flipper goes up
+			if tusc.mode == TANK:
+				up_down_flipper = joystick.get_axis(ps4_axes["r_stick_v"])
+				print(f"up_down : {up_down_flipper}")
 
-						if up_down_flipper > 0.5:
-							tusc.lin_act.retract()
-						elif up_down_flipper < -0.5:
-							tusc.lin_act.extend()
+				if up_down_flipper > 0.5:
+					tusc.lin_act.retract()
+				elif up_down_flipper < -0.5:
+					tusc.lin_act.extend()
 
 			# ********** New Function for Flipper **********
 
