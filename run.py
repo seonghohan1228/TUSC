@@ -54,6 +54,10 @@ class LinearActuator:
 		self.in_2_val = HIGH
 		# Controlled by joystick by default
 		self.joystick_control = True
+
+		# Controlled by joystick axis 
+		self.joystick_control_by_axis = False
+		
 		self.counter = 0
 		self.set_pins()
 
@@ -376,11 +380,18 @@ def main():
 
 				if up_down_flipper > 0.5:
 					tusc.lin_act.retract()
+					tusc.joystick_control_by_axis = True
 				elif up_down_flipper < -0.5:
 					tusc.lin_act.extend()
+					tusc.joystick_control_by_axis = True
+				
+
+				if up_down_flipper <= 0.5 and up_down_flipper >= -0.5 and tusc.joystick_control_by_axis:
+					tusc.lin_act.stop()
+					tusc.joystick_control_by_axis = False
 
 			# ********** New Function for Flipper **********
-
+			
 			if tusc.lin_act.joystick_control == False:
 				tusc.lin_act.counter += 1
 				if tusc.lin_act.counter >= tusc.LIN_ACT_COUNT:
