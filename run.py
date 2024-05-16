@@ -225,8 +225,8 @@ class TUSC:
 			# mapped_input_L = max(-1., min(1. ,input + (-interval*angle) * (1 if forward else -1)))
 			# mapped_input_R = max(-1., min(1. ,input + (+interval*angle) * (1 if forward else -1)))
 
-			mapped_input_L = max(-1. if input == 0. else 0., min(1. ,input + (-interval*angle) ))
-			mapped_input_R = max(-1. if input == 0. else 0., min(1. ,input + (+interval*angle) ))
+			mapped_input_L = max(-1., min(1. if input == 0. else 0. ,input + (-interval*angle) ))
+			mapped_input_R = max(-1., min(1. if input == 0. else 0 ,input + (+interval*angle) ))
 			
 
 		print(f"mapped_intput_L: {mapped_input_L}")
