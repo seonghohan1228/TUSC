@@ -332,7 +332,7 @@ def main():
 
 					# Flipper goes up
 					if tusc.mode == TANK:
-						up_down_flipper = joystick.get_axis(ps4_axes["l_stick_h"])
+						up_down_flipper = joystick.get_axis(ps4_axes["r_stick_v"])
 
 						if up_down_flipper > 0.5:
 							tusc.lin_act.retract()
