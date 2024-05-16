@@ -232,8 +232,8 @@ class TUSC:
 			forth = True if input > 0. else False
 			stop = True if input == 0. else False
 
-			input_max = (0. if forth else 1.) if not stop else 1.
-			input_min = (-1. if forth else 0.) if not stop else -1.
+			input_max = (1. if forth else 0.) if not stop else 1.
+			input_min = (0. if forth else -1.) if not stop else -1.
 
 			mapped_input_L = max(input_min, min(input_max,input + (-interval*angle) ))
 			mapped_input_R = max(input_min, min(input_max ,input + (+interval*angle) ))
