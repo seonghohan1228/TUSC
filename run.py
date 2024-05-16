@@ -211,7 +211,7 @@ class TUSC:
 			# (x,y) = (steer_LR, steer_UD)
 
 			
-			interval = 0.5
+			interval = 0.5*self.sensitivity
 			forward = True if steer_UD >= 0 else False
 			
 			if steer_LR**2 + steer_UD**2 > 0.5**2:
@@ -225,8 +225,8 @@ class TUSC:
 			# mapped_input_L = max(-1., min(1. ,input + (-interval*angle) * (1 if forward else -1)))
 			# mapped_input_R = max(-1., min(1. ,input + (+interval*angle) * (1 if forward else -1)))
 
-			mapped_input_L = max(-1., min(1. ,input + (-interval*angle*self.sensitivity) ))
-			mapped_input_R = max(-1., min(1. ,input + (+interval*angle*self.sensitivity) ))
+			mapped_input_L = max(-1. if input == 0. else 0., min(1. ,input + (-interval*angle) ))
+			mapped_input_R = max(-1. if input == 0. else 0., min(1. ,input + (+interval*angle) ))
 			
 
 		print(f"mapped_intput_L: {mapped_input_L}")
