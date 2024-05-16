@@ -380,15 +380,15 @@ def main():
 
 				if up_down_flipper > 0.5:
 					tusc.lin_act.retract()
-					tusc.joystick_control_by_axis = True
+					tusc.lin_act.joystick_control_by_axis = True
 				elif up_down_flipper < -0.5:
 					tusc.lin_act.extend()
-					tusc.joystick_control_by_axis = True
+					tusc.lin_act.joystick_control_by_axis = True
 				
 
-				if up_down_flipper <= 0.5 and up_down_flipper >= -0.5 and tusc.joystick_control_by_axis:
+				if up_down_flipper <= 0.5 and up_down_flipper >= -0.5 and tusc.lin_act.joystick_control_by_axis:
 					tusc.lin_act.stop()
-					tusc.joystick_control_by_axis = False
+					tusc.lin_act.joystick_control_by_axis = False
 
 			# ********** New Function for Flipper **********
 			
