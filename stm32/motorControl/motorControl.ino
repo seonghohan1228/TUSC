@@ -2,6 +2,8 @@
 #include <Servo.h>
 #include <queue>
 
+#include "packet.h"
+
 // Modes
 const int STEER = 0;
 const int TANK = 1;
@@ -28,11 +30,6 @@ const int GearLEDPin3 = PA7;
 const int MIN_PULSEWIDTH = 1000;
 const int IDLE_PULSEWIDTH = 1500;
 const int MAX_PULSEWIDTH = 2000;
-
-// Packet info
-const byte START_BYTE = 0x02;
-const byte END_BYTE = 0x03;
-const int PACKET_SIZE = 9;
 
 // ESC instances
 Servo ESC_L;    
@@ -146,7 +143,7 @@ uint8_t calculate_checksum(uint8_t data[], int length)
   }
   return checksum % 256;
 }
-/******************************************************************************/
+
 
 void LED_control(int mode, int gear)
 {
@@ -232,48 +229,43 @@ void loop()
   static int buffer_index = 0;
 
   // Read angle from sensors
-  //float angle1 = readAngle(sen1);
-  //float angle2 = readAngle(sen2);
+  float angle1 = readAngle(sen1);
+  float angle2 = readAngle(sen2);
   
   while (Serial.available())
   {
     byte incoming_byte = Serial.read();
 
     if (buffer_index == 0)
-    {
       if (incoming_byte == START_BYTE)
-      {
         buffer[buffer_index++] = incoming_byte;
-      }
-    }
+    
     else
     {
       buffer[buffer_index++] = incoming_byte;
       if (buffer_index == PACKET_SIZE)
       {
         // Read incoming bytes
-        byte received[PACKET_SIZE];
+        uint8_t received[PACKET_SIZE];
         Serial.readBytes(received, PACKET_SIZE);
+        
         // Check validity of packet
-        if (received[0] == START_BYTE && received[PACKET_SIZE - 1] == END_BYTE)
+        struct Packet *packet;
+        arrayToPacket(received, packet);
+        if (packetIsValid(packet));
         {
-          byte mode = received[1];
-          byte gear = received[2];
-          int16_t speed_L = (received[3] << 8) | received[4];  // Higher byte | Lower byte
-          int16_t speed_R = (received[5] << 8) | received[6];
+          uint8_t mode = packet->payload->mode;
+          uint8_t gear = packet->payload->gear;
+          uint16_t speed_L = packet->payload->speed_L;
+          uint16_t speed_R = packet->payload->speed_R;
+          
+          // Control
+          LED_control(mode, gear);
 
-          byte payload[] = { mode, gear, received[3], received[4], received[5], received[6] };
-
-          // If checksum is correct, act
-          byte checksum = calculate_checksum(payload, 6);
-          if (checksum == received[7])
-          {
-            LED_control(mode, gear);
-
-            ESC_L.write(map(speed_L, -100, 100, 0, 180));
-            ESC_R.write(map(speed_R, -100, 100, 0, 180));
-          }
+          ESC_L.write(map(speed_L, -100, 100, 0, 180));
+          ESC_R.write(map(speed_R, -100, 100, 0, 180));
         }
+
         buffer_index = 0;
       }
     }
