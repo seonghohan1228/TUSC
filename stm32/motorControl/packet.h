@@ -29,3 +29,4 @@ struct Packet *arrayToPacket(uint8_t *arr);
 bool packetIsValid(struct Packet *packet);
 
 #endif
+

@@ -96,3 +96,63 @@ uint8_t readStatus(TwoWire &wire)
 
   return result; // Return the 5-bit status representation
 }
+
+float readRPM(TwoWire &wire)
+{
+  /*
+  @brief Read angular velocity using AS5600 sensor
+  @param &wire TwoWire : reference to I2C bus instance
+  @note 이 함수는 주기적으로 호출되어야함
+  @return float : angular velocity in degrees per second, or COM_FAIL if fail
+  */
+  static float previousAngle = 0.0;
+  static unsigned long previousMicros = 0;
+
+  wire.beginTransmission(AS5600_ADDR);
+  wire.write(ANGLE_ADDR);
+  wire.endTransmission(false);
+  wire.requestFrom(AS5600_ADDR, 2);
+
+  if (wire.available() < 2)
+    return COM_FAIL;
+
+  byte highByte = wire.read();
+  byte lowByte = wire.read();
+  float currentRawAngle = (highByte << 8) | lowByte;       // 12-bit raw angle
+  float currentAngle = (currentRawAngle / 4095.0) * 360.0; // Convert raw angle to degrees
+
+  unsigned long currentMicros = micros();
+
+  // Initialize time and angle
+  if (previousMicros == 0)
+  {
+    previousMicros = currentMicros;
+    previousAngle = currentAngle;
+    return 0.0;
+  }
+
+  float dt = (currentMicros - previousMicros) / 1000000.0;
+  if (dt == 0)
+    return 0.0;
+
+  float deltaAngle = currentAngle - previousAngle;
+
+  // Adjust for wrapping
+  if (deltaAngle > 180)
+    deltaAngle -= 360;
+  else if (deltaAngle < -180)
+    deltaAngle += 360;
+
+  // Calculate angular velocity in degrees per second
+  float angularVelocity = deltaAngle / dt;
+
+  // Convert angular velocity from degrees per second to RPM
+  float rpm = angularVelocity / 360.0 * 60.0;
+
+  // Update previous values
+  previousAngle = currentAngle;
+  previousMicros = currentMicros;
+
+  return rpmFilter.add(rpm);
+}
+

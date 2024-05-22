@@ -1,9 +1,12 @@
+// motorControl.ino
+
 #include <Wire.h>
 #include <Servo.h>
 #include <queue>
 
 #include "encoder.h"
 #include "packet.h"
+#include "pid.hpp"
 
 // Modes
 const int STEER = 0;
@@ -22,6 +25,13 @@ const int MIN_PULSEWIDTH = 1000;
 const int IDLE_PULSEWIDTH = 1500;
 const int MAX_PULSEWIDTH = 2000;
 
+float targetSpeed1 = 3000.0;
+float targetSpeed2 = 3000.0;
+float currentSpeed1 = 0;
+float currentSpeed2 = 0;
+
+float stop_threshold = 30;
+
 // ESC instances
 Servo ESC_L;    
 Servo ESC_R;
@@ -29,6 +39,11 @@ Servo ESC_R;
 // I2C instances
 TwoWire sen1(PB7, PA15);
 TwoWire sen2(PB5, PA8);
+
+// PID instances
+MovingAverageFilter rpmFilter(30);
+PID pid1(KP, KI, KD, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
+PID pid2(KP, KI, KD, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
 
 void LED_control(int mode, int gear)
 {
@@ -113,6 +128,9 @@ void loop()
   static byte buffer[PACKET_SIZE];
   static int buffer_index = 0;
 
+  static float pwmValue1;
+  static float pwmValue2;
+
   // Read angle from sensors
   float angle1 = readDegreeAngle(sen1);
   float angle2 = readDegreeAngle(sen2);
@@ -143,37 +161,31 @@ void loop()
           uint8_t gear = packet->payload->gear;
           uint16_t speed_L = packet->payload->speed_L;
           uint16_t speed_R = packet->payload->speed_R;
+
+          pid1.goalVelocity(speed_L);
+          pid2.goalVelocity(speed_R);
+          
+          currentSpeed1 = readRPM(sen1);
+          currentSpeed2 = readRPM(sen2);
+          pwmValue1 = pid1.computePulseWidth(currentSpeed1);
+          pwmValue2 = pid2.computePulseWidth(currentSpeed2);
+          
+          // Stabilizing stop
+          if (abs(targetSpeed1) < stop_threshold)
+            ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
+          if (abs(targetSpeed2) < stop_threshold)
+            ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
           
           // Control
           LED_control(mode, gear);
 
-          ESC_L.writeMicroseconds(map(speed_L, -100, 100, MIN_PULSEWIDTH, MAX_PULSEWIDTH));
-          ESC_R.writeMicroseconds(map(speed_R, -100, 100, MIN_PULSEWIDTH, MAX_PULSEWIDTH));
+          ESC_L.writeMicroseconds(pwmValue1);
+          ESC_R.writeMicroseconds(pwmValue2);
         }
 
         buffer_index = 0;
       }
     }
-  
-    /*
-    if (angle1 != COM_FAIL)
-    {
-      Serial.print(angle1);
-      Serial.print(" ");
-    }
-    else
-    {
-      Serial.print("Failed to read angle from sensor 1; ");
-    }
-
-    if (angle2 != COM_FAIL)
-    {
-      Serial.println(angle2);
-    }
-    else
-    {
-      Serial.println("Failed to read angle from sensor 2");
-    }*/
   }
 }
 

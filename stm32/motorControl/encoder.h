@@ -17,6 +17,7 @@ const char COM_SUCCESS = 1;
 float readDegreeAngle(TwoWire &wire);
 bool setZeroPosition(TwoWire &wire, unsigned int zeroPosition);
 uint8_t readStatus(TwoWire &wire);
-
+float readRPM(TwoWire &wire);
 
 #endif
+
