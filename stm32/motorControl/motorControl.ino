@@ -94,7 +94,6 @@ void LED_control(int mode, int gear)
   }
 }
 
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 void setup()
