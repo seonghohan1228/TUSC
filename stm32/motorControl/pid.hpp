@@ -46,7 +46,6 @@ public:
   }
 };
 
-//----------------------------------------------------------------------
 /*
 @brief Calculate PID results
 @param kp float : P Gain
@@ -71,6 +70,9 @@ private:
   float max_Val;  // 입력값의 최댓값
   float min_Val;  // 입력값의 최솟값
   float stop_Val; // 정지값
+
+  float previousAngle = 0.0;
+  unsigned long previousMicros = 0;
 
   float antiwind_Threshold = 400; // Integral anti-windup 기준값
   unsigned long previousTime;
@@ -110,6 +112,56 @@ public:
   void setAntiWindup(float value)
   {
     antiwind_Threshold = value;
+  }
+
+  float readRPM(TwoWire &wire)
+  {
+    wire.beginTransmission(AS5600_ADDR);
+    wire.write(ANGLE_ADDR);
+    wire.endTransmission(false);
+    wire.requestFrom(AS5600_ADDR, 2);
+
+    if (wire.available() < 2)
+      return COM_FAIL;
+
+    byte highByte = wire.read();
+    byte lowByte = wire.read();
+    float currentRawAngle = (highByte << 8) | lowByte;       // 12-bit raw angle
+    float currentAngle = (currentRawAngle / 4095.0) * 360.0; // Convert raw angle to degrees
+
+    unsigned long currentMicros = micros();
+
+    // Initialize time and angle
+    if (previousMicros == 0)
+    {
+      previousMicros = currentMicros;
+      previousAngle = currentAngle;
+      return 0.0;
+    }
+
+    float dt = (currentMicros - previousMicros) / 1000000.0;
+    if (dt == 0)
+      return 0.0;
+
+    float deltaAngle = currentAngle - previousAngle;
+
+    // Adjust for wrapping
+    if (deltaAngle > 180)
+      deltaAngle -= 360;
+    else if (deltaAngle < -180)
+      deltaAngle += 360;
+
+    // Calculate angular velocity in degrees per second
+    float angularVelocity = deltaAngle / dt;
+
+    // Convert angular velocity from degrees per second to RPM
+    float rpm = angularVelocity / 360.0 * 60.0;
+
+    // Update previous values
+    previousAngle = currentAngle;
+    previousMicros = currentMicros;
+
+    return rpm;
   }
 
   /*
@@ -154,4 +206,3 @@ public:
 };
 
 #endif
-
