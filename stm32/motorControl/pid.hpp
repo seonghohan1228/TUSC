@@ -71,8 +71,8 @@ private:
   float min_Val;  // 입력값의 최솟값
   float stop_Val; // 정지값
 
-  float previousAngle = 0.0;
-  unsigned long previousMicros = 0;
+  float previousAngle;
+  unsigned long previousMicros;
 
   float antiwind_Threshold = 400; // Integral anti-windup 기준값
   unsigned long previousTime;
@@ -83,7 +83,11 @@ private:
   MovingAverageFilter rpmFilter;
 
 public:
-  PID(float p, float i, float d, float min, float max, float stop) : kp(p), ki(i), kd(d), max_Val(max), min_Val(min), stop_Val(stop), previousError(0), integral(0), goal(0), filtered_velocity(0), previousTime(0), pidFilter(PID_filter_Size), rpmFilter(RPM_filter_Size) {}
+  PID(float p, float i, float d, float min, float max, float stop) : kp(p), ki(i), kd(d), max_Val(max), min_Val(min), stop_Val(stop), previousError(0), integral(0), goal(0), filtered_velocity(0), previousTime(0), pidFilter(PID_filter_Size), rpmFilter(RPM_filter_Size)
+  {
+    previousAngle = 0.0;
+    previousMicros = 0;
+  }
 
   /*
   @brief set goal velocity

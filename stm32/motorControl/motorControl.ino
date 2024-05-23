@@ -96,10 +96,12 @@ void loop()
           pid1.goalVelocity(speed_L);
           pid2.goalVelocity(speed_R);
           
-          currentSpeed1 = readRPM(sen1);
-          currentSpeed2 = readRPM(sen2);
+          currentSpeed1 = pid1.readRPM(sen1);
+          currentSpeed2 = pid2.readRPM(sen2);
           pwmValue1 = pid1.computePulseWidth(currentSpeed1);
           pwmValue2 = pid2.computePulseWidth(currentSpeed2);
+          pwmValue1 = map(speed_L, -100, 100, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
+          pwmValue2 = map(speed_R, -100, 100, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
           
           // Stabilizing stop
           if (abs(targetSpeed1) < stop_threshold)
