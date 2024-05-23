@@ -2,11 +2,16 @@
 
 #ifndef PACKET_HPP
 #define PACKET_HPP
+#include <queue>
 
 // PID
-float KP = 0.03;
-float KI = 0.60;
-float KD = 0.0001;
+float KP1 = 0.03;
+float KI1 = 0.60;
+float KD1 = 0.0001;
+
+float KP2 = 0.03;
+float KI2 = 0.60;
+float KD2 = 0.0001;
 
 /*
 @brief moving average filter

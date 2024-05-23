@@ -42,8 +42,8 @@ TwoWire sen2(PB5, PA8);
 
 // PID instances
 MovingAverageFilter rpmFilter(30);
-PID pid1(KP, KI, KD, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
-PID pid2(KP, KI, KD, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
+PID pid1(KP1, KI1, KD1, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
+PID pid2(KP2, KI2, KD2, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
 
 void LED_control(int mode, int gear)
 {
@@ -130,18 +130,18 @@ void loop()
 
   static float pwmValue1;
   static float pwmValue2;
-
-  // Read angle from sensors
-  float angle1 = readDegreeAngle(sen1);
-  float angle2 = readDegreeAngle(sen2);
   
   while (Serial.available())
   {
     byte incoming_byte = Serial.read();
 
     if (buffer_index == 0)
+    {
       if (incoming_byte == START_BYTE)
+      {
         buffer[buffer_index++] = incoming_byte;
+      }
+    }
     
     else
     {
@@ -149,19 +149,17 @@ void loop()
       if (buffer_index == PACKET_SIZE)
       {
         // Read incoming bytes
-        uint8_t received[PACKET_SIZE];
-        Serial.readBytes(received, PACKET_SIZE);
+        uint8_t packet[PACKET_SIZE];
+        Serial.readBytes(packet, PACKET_SIZE);
         
         // Check validity of packet
-        struct Packet *packet;
-        arrayToPacket(received, packet);
-        if (packetIsValid(packet));
+        if (packetIsValid(packet))
         {
-          uint8_t mode = packet->payload->mode;
-          uint8_t gear = packet->payload->gear;
-          uint16_t speed_L = packet->payload->speed_L;
-          uint16_t speed_R = packet->payload->speed_R;
-
+          uint8_t mode = packet[1];
+          uint8_t gear = packet[2];
+          int16_t speed_L = (packet[3] << 8) | packet[4];  // Higher byte | Lower byte
+          int16_t speed_R = (packet[5] << 8) | packet[6];
+          
           pid1.goalVelocity(speed_L);
           pid2.goalVelocity(speed_R);
           
@@ -175,6 +173,7 @@ void loop()
             ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
           if (abs(targetSpeed2) < stop_threshold)
             ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
+          
           
           // Control
           LED_control(mode, gear);
