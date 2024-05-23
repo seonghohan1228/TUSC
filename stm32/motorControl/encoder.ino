@@ -153,6 +153,6 @@ float readRPM(TwoWire &wire)
   previousAngle = currentAngle;
   previousMicros = currentMicros;
 
-  return rpmFilter.add(rpm);
+  return rpm;
 }
 
