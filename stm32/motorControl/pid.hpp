@@ -46,6 +46,7 @@ public:
   }
 };
 
+//----------------------------------------------------------------------
 /*
 @brief Calculate PID results
 @param kp float : P Gain
@@ -65,6 +66,7 @@ private:
   float previousError;
   float integral;
   float goal; // 목표속도
+  float filtered_velocity;
 
   float max_Val;  // 입력값의 최댓값
   float min_Val;  // 입력값의 최솟값
@@ -73,11 +75,13 @@ private:
   float antiwind_Threshold = 400; // Integral anti-windup 기준값
   unsigned long previousTime;
 
-  int filter_Size = 10;
+  int PID_filter_Size = 10;
+  int RPM_filter_Size = 30;
   MovingAverageFilter pidFilter;
+  MovingAverageFilter rpmFilter;
 
 public:
-  PID(float p, float i, float d, float min, float max, float stop) : kp(p), ki(i), kd(d), max_Val(max), min_Val(min), stop_Val(stop), previousError(0), integral(0), goal(0), previousTime(0), pidFilter(filter_Size) {}
+  PID(float p, float i, float d, float min, float max, float stop) : kp(p), ki(i), kd(d), max_Val(max), min_Val(min), stop_Val(stop), previousError(0), integral(0), goal(0), filtered_velocity(0), previousTime(0), pidFilter(PID_filter_Size), rpmFilter(RPM_filter_Size) {}
 
   /*
   @brief set goal velocity
@@ -87,6 +91,15 @@ public:
   void goalVelocity(float sp)
   {
     goal = sp;
+  }
+
+  /*
+    @brief 필터링된 현재 rpm을 반환
+    @return float : 필터링된 현재 rpm
+    */
+  float get_Velocity()
+  {
+    return filtered_velocity;
   }
 
   /*
@@ -106,13 +119,14 @@ public:
      */
   float computePulseWidth(float input)
   {
-    unsigned long currentTime = micros(); // us
+    unsigned long currentTime = micros();     // us
+    filtered_velocity = rpmFilter.add(input); // filtered velocity
     float dt = (currentTime - previousTime) / 1000000.0;
 
     if (dt == 0)
       return 0;
 
-    float error = goal - input;                      // P
+    float error = goal - filtered_velocity;          // P
     integral += error * dt;                          // I
     float derivative = (error - previousError) / dt; // D
 
