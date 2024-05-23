@@ -220,8 +220,8 @@ class TUSC:
 			mapped_input_R = max(-1., min(1. ,input + (+interval*angle*self.sensitivity) ))
 			
 
-		print(f"mapped_intput_L: {mapped_input_L}")
-		print(f"mapped_input_R: {mapped_input_R}")
+		#print(f"mapped_intput_L: {mapped_input_L}")
+		#print(f"mapped_input_R: {mapped_input_R}")
 		self.bldc_L.set_speed(mapped_input_L, self.scalar)
 		self.bldc_R.set_speed(mapped_input_R, self.scalar)
 	
@@ -259,6 +259,7 @@ def main():
 	# Run TUSC
 	try:
 		ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+		ser.reset_input_buffer()
 		tusc = TUSC()
 		
 		# Main loop
@@ -289,6 +290,10 @@ def main():
 			packet = Packet(ser)
 			packet.create(tusc.mode, tusc.gear, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
 			packet.send()
+
+			if ser.in_waiting > 0:
+				line = ser.readline().decode('utf-8').rstrip()
+				print(line)
 
             # Handle Pygame events
 			events = pygame.event.get()
