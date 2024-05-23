@@ -178,30 +178,11 @@ class TUSC:
 			self.bldc_R.set_speed(input, self.scalar)
 			return
 		
-		# if self.mode == "tank":
-		# 	mapped_input_L = input_L
-		# 	mapped_input_R = input_R
+		if self.mode == TANK:
+			mapped_input_L = steer_UD
+			mapped_input_R = steer_LR
 		
 		if self.mode == STEER:
-			mapped_input_L = steer_LR
-			mapped_input_R = -steer_UD
-			# mapped_input_L = steer_UD + self.sensitivity * steer_LR
-			# mapped_input_R = steer_UD - self.sensitivity * steer_LR
-			# if mapped_input_L < -1:
-			# 	mapped_input_L = -1
-			# if mapped_input_R < -1:
-			# 	mapped_input_R = -1
-			# if mapped_input_L > 1:
-			# 	mapped_input_L = 1
-			# if mapped_input_R > 1:
-			# 	mapped_input_R = 1
-		
-		if self.mode == TANK:
-			# mapped_input_L = input_L
-			# mapped_input_R = input_R
-			# (x,y) = (steer_LR, steer_UD)
-
-			
 			interval = 0.5
 			forward = True if steer_UD >= 0 else False
 			
@@ -210,12 +191,6 @@ class TUSC:
 			else:
 				angle = 0.
 			
-			# mapped_input_L = max(-1., min(1. ,input + (-interval*angle if angle<0 else interval*angle) * (1 if forward else -1)))
-			# mapped_input_R = max(-1., min(1. ,input + (+interval*angle if angle<0 else -interval*angle) * (1 if forward else -1)))
-
-			# mapped_input_L = max(-1., min(1. ,input + (-interval*angle) * (1 if forward else -1)))
-			# mapped_input_R = max(-1., min(1. ,input + (+interval*angle) * (1 if forward else -1)))
-
 			mapped_input_L = max(-1., min(1. ,input + (-interval*angle*self.sensitivity) ))
 			mapped_input_R = max(-1., min(1. ,input + (+interval*angle*self.sensitivity) ))
 			
@@ -272,16 +247,16 @@ def main():
 			axis_value_L = None
 			axis_value_R = None
 
-			if tusc.mode == STEER:
+			if tusc.mode == TANK:
 				speed_input = None
-				axis_value_L = -joystick.get_axis(1)
-				axis_value_R = joystick.get_axis(3)  # Right joystick x
+				axis_value_L = -joystick.get_axis(1)  # Left joystick y
+				axis_value_R = -joystick.get_axis(3)  # Right joystick y
 				
-			elif tusc.mode == TANK:
+			elif tusc.mode == STEER:
 				axis_value_UD = -joystick.get_axis(ps4_axes["l_stick_v"])
 				axis_value_LR = joystick.get_axis(ps4_axes["l_stick_h"])  # Right joystick y
-				l2_trigger = (joystick.get_axis(ps4_axes["l2_trigger"]) + 1.0) /2.
-				r2_trigger = (joystick.get_axis(ps4_axes["r2_trigger"]) + 1.0) /2.
+				l2_trigger = -(joystick.get_axis(ps4_axes["l2_trigger"]) + 1.0) /2.
+				r2_trigger = -(joystick.get_axis(ps4_axes["r2_trigger"]) + 1.0) /2.
 				speed_input = l2_trigger - r2_trigger
 			
 			# tusc.set_speed(axis_value_L, axis_value_R)
