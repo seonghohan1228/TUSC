@@ -12,14 +12,6 @@
 const int STEER = 0;
 const int TANK = 1;
 
-// Pin numbers
-const int ModeLEDPin0 = PA9;
-const int ModeLEDPin1 = PA10;
-const int GearLEDPin0 = PA4;
-const int GearLEDPin1 = PA5;
-const int GearLEDPin2 = PA6;
-const int GearLEDPin3 = PA7;
-
 // Pulsewidth; units are in ms
 const int MIN_PULSEWIDTH = 1000;
 const int IDLE_PULSEWIDTH = 1500;
@@ -41,58 +33,8 @@ TwoWire sen1(PB7, PA15);
 TwoWire sen2(PB5, PA8);
 
 // PID instances
-MovingAverageFilter rpmFilter(30);
 PID pid1(KP1, KI1, KD1, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
 PID pid2(KP2, KI2, KD2, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
-
-void LED_control(int mode, int gear)
-{
-  switch (mode)
-  {
-    case STEER:
-      digitalWrite(ModeLEDPin0, HIGH);
-      digitalWrite(ModeLEDPin1, LOW);
-      break;
-    case TANK:
-      digitalWrite(ModeLEDPin0, LOW);
-      digitalWrite(ModeLEDPin1, HIGH);
-      break;
-    default:
-      // Mode error
-      break;
-  }
-
-  switch (gear)
-  {
-    case 1:
-      digitalWrite(GearLEDPin0, HIGH);
-      digitalWrite(GearLEDPin1, LOW);
-      digitalWrite(GearLEDPin2, LOW);
-      digitalWrite(GearLEDPin3, LOW);
-      break;
-    case 2:
-      digitalWrite(GearLEDPin0, HIGH);
-      digitalWrite(GearLEDPin1, HIGH);
-      digitalWrite(GearLEDPin2, LOW);
-      digitalWrite(GearLEDPin3, LOW);
-      break;
-    case 3:
-      digitalWrite(GearLEDPin0, HIGH);
-      digitalWrite(GearLEDPin1, HIGH);
-      digitalWrite(GearLEDPin2, HIGH);
-      digitalWrite(GearLEDPin3, LOW);
-      break;
-    case 4:
-      digitalWrite(GearLEDPin0, HIGH);
-      digitalWrite(GearLEDPin1, HIGH);
-      digitalWrite(GearLEDPin2, HIGH);
-      digitalWrite(GearLEDPin3, HIGH);
-      break;
-    default:
-      // Speed level error
-      break;
-  }
-}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -104,14 +46,6 @@ void setup()
   // Encoders
   sen1.begin();
   sen2.begin();
-
-  // LED pins
-  pinMode(ModeLEDPin0, OUTPUT);
-  pinMode(ModeLEDPin1, OUTPUT);
-  pinMode(GearLEDPin0, OUTPUT);
-  pinMode(GearLEDPin1, OUTPUT);
-  pinMode(GearLEDPin2, OUTPUT);
-  pinMode(GearLEDPin3, OUTPUT);
   
   // PWM pins for ESCs
   ESC_L.attach(PA0, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
@@ -173,12 +107,14 @@ void loop()
           if (abs(targetSpeed2) < stop_threshold)
             ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
           
+          // Print filtered velocity
+          Serial.print(pid1.get_Velocity());
+          Serial.print(" ");
+          Serial.println(pid2.get_Velocity());
           
-          // Control
-          LED_control(mode, gear);
-
           ESC_L.writeMicroseconds(pwmValue1);
           ESC_R.writeMicroseconds(pwmValue2);
+          delay(2);
         }
 
         buffer_index = 0;
