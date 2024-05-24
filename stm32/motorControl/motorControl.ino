@@ -130,9 +130,17 @@ void loop()
             ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
 
           // Print filtered velocity
+          Serial.print(speed_L);
+          Serial.print(" ");
           Serial.print(pid1.get_Velocity());
           Serial.print(" ");
-          Serial.println(pid2.get_Velocity());
+          Serial.print(pwmValue1);
+          Serial.print("\t");
+          Serial.print(speed_R);
+          Serial.print(" ");
+          Serial.print(pid2.get_Velocity());
+          Serial.print(" ");
+          Serial.println(pwmValue2);
 
           ESC_L.writeMicroseconds(pwmValue1);
           ESC_R.writeMicroseconds(pwmValue2);

@@ -8,13 +8,13 @@ static const int PID_FILTER_SIZE = 10;
 static const int RPM_FILTER_SIZE = 30;
 
 // PID
-float KP1 = 0.03;
-float KI1 = 0.60;
-float KD1 = 0.0001;
+float KP1 = 0.02;
+float KI1 = 0.5;
+float KD1 = 0.001;
 
-float KP2 = 0.03;
-float KI2 = 0.60;
-float KD2 = 0.0001;
+float KP2 = 0.02;
+float KI2 = 0.5;
+float KD2 = 0.001;
 
 /*
 @brief moving average filter
