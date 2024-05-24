@@ -109,8 +109,17 @@ void loop()
         // Check validity of packet
         if (packetIsValid(packet))
         {
-          int16_t speed_L = (packet[1] << 8) | packet[2]; // Higher byte | Lower byte
-          int16_t speed_R = (packet[3] << 8) | packet[4];
+          uint8_t mode = packet[1]; // 0: STOP, 1: RUN
+
+          if (mode == 0)
+          {
+            ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
+            ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
+            exit(0);
+          }
+
+          int16_t speed_L = (packet[2] << 8) | packet[3]; // Higher byte | Lower byte
+          int16_t speed_R = (packet[4] << 8) | packet[5];
 
           speed_L = map(speed_L, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
           speed_R = map(speed_R, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);

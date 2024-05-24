@@ -16,6 +16,9 @@ HIGH = 1
 STEER = 0
 TANK = 1
 
+STOP = 0
+RUN = 1
+
 
 ps4_buttons = {
 	"cross": 0,
@@ -300,7 +303,7 @@ def main():
 			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R) 
 			# Create and send data packet
 			packet = Packet(ser)
-			packet.create(int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
+			packet.create(RUN, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
 			packet.send()
 
 			if ser.in_waiting > 0:
@@ -317,7 +320,7 @@ def main():
 					tusc.set_speed(0, 0)
 					tusc.mode = STEER
 					tusc.gear = 1
-					packet.create(0, 0)
+					packet.create(STOP, 0, 0)
 					packet.send()
 					tusc.pi.stop()
 					pygame.quit()
@@ -335,7 +338,7 @@ def main():
 						tusc.set_speed(0)
 						tusc.mode = STEER
 						tusc.gear = 1
-						packet.create(tusc.mode, tusc.gear, 0, 0)
+						packet.create(STOP, 0, 0)
 						packet.send()
 						tusc.pi.stop()
 						pygame.quit()
@@ -404,7 +407,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(0, 0)
+		packet.create(STOP, 0, 0)
 		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
@@ -413,7 +416,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(0, 0)
+		packet.create(STOP, 0, 0)
 		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
