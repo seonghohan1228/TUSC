@@ -326,6 +326,8 @@ def main():
 					tusc.gear = 1
 					packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
 					packet.send()
+					packet.send()
+					packet.send()
 					time.sleep(0.01)
 					ser.close()
 					tusc.pi.stop()
@@ -345,6 +347,8 @@ def main():
 						tusc.mode = STEER
 						tusc.gear = 1
 						packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
+						packet.send()
+						packet.send()
 						packet.send()
 						time.sleep(0.01)
 						ser.close()
@@ -424,6 +428,8 @@ def main():
 		tusc.gear = 1
 		packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
 		packet.send()
+		packet.send()
+		packet.send()
 		time.sleep(0.01)
 		ser.close()
 		tusc.pi.stop()
@@ -434,6 +440,8 @@ def main():
 		tusc.mode = STEER
 		tusc.gear = 1
 		packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
+		packet.send()
+		packet.send()
 		packet.send()
 		time.sleep(0.01)
 		ser.close()
