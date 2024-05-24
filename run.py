@@ -16,8 +16,11 @@ HIGH = 1
 STEER = 0
 TANK = 1
 
-STOP = 0
-RUN = 1
+OFF = 0
+ON = 1
+
+DISABLED = 0
+ENABLED = 1
 
 
 ps4_buttons = {
@@ -141,6 +144,7 @@ class TUSC:
 		self.bldc_R = BLDC(scalar=self.scalar, trim=0)
 		self.sensitivity = self.DEFAULT_SENSITIVITY
 		self.mode = STEER
+		self.pid = ON
 	
 	def upshift(self):
 		self.gear += 1
@@ -303,7 +307,7 @@ def main():
 			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R) 
 			# Create and send data packet
 			packet = Packet(ser)
-			packet.create(RUN, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
+			packet.create(ON, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
 			packet.send()
 
 			if ser.in_waiting > 0:
@@ -320,8 +324,9 @@ def main():
 					tusc.set_speed(0, 0)
 					tusc.mode = STEER
 					tusc.gear = 1
-					packet.create(STOP, 0, 0)
+					packet.create(OFF, tusc.pid, tusc.bldc_L.speed, tusc.bldc_L.speed)
 					packet.send()
+					time.sleep(0.01)
 					ser.close()
 					tusc.pi.stop()
 					pygame.quit()
@@ -339,8 +344,9 @@ def main():
 						tusc.set_speed(0)
 						tusc.mode = STEER
 						tusc.gear = 1
-						packet.create(STOP, 0, 0)
+						packet.create(OFF, tusc.pid, tusc.bldc_L.speed, tusc.bldc_L.speed)
 						packet.send()
+						time.sleep(0.01)
 						ser.close()
 						tusc.pi.stop()
 						pygame.quit()
@@ -357,7 +363,7 @@ def main():
 						tusc.lin_act.counter = 0  # Reset counter
 						tusc.lin_act.joystick_control = False
 
-					# Flipper switches direction if L stick is pressed
+					# Flipper switches direction if R stick is pressed
 					if joystick.get_button(ps4_buttons["R stick in"]):
 						# If linear actuator has stopped, set to extend
 						if tusc.lin_act.in_1_val == LOW and tusc.lin_act.in_2_val == LOW:
@@ -366,6 +372,13 @@ def main():
 							tusc.lin_act.flip_direction()
 						tusc.lin_act.counter = 0
 						tusc.lin_act.joystick_control = True
+
+					# Toggle PID control on/off if L stick is pressed
+					if joystick.get_button(ps4_buttons["L stick in"]):
+						if tusc.pid == ON:
+							tusc.pid = OFF
+						else:
+							tusc.pid = ON
 
 					# Shifting
 					if joystick.get_button(ps4_buttons["L1"]):
@@ -409,8 +422,9 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(STOP, 0, 0)
+		packet.create(OFF, tusc.pid, tusc.bldc_L.speed, tusc.bldc_L.speed)
 		packet.send()
+		time.sleep(0.01)
 		ser.close()
 		tusc.pi.stop()
 		pygame.quit()
@@ -419,8 +433,9 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(STOP, 0, 0)
+		packet.create(OFF, tusc.pid, tusc.bldc_L.speed, tusc.bldc_L.speed)
 		packet.send()
+		time.sleep(0.01)
 		ser.close()
 		tusc.pi.stop()
 		pygame.quit()
