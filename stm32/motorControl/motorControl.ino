@@ -106,7 +106,7 @@ void loop()
           pid2.goalVelocity(speed_R);
 
           currentSpeed1 = pid1.readRPM(sen1);
-          currentSpeed2 = -pid2.readRPM(sen2);
+          currentSpeed2 = pid2.readRPM(sen2);
           pwmValue1 = pid1.computePulseWidth(currentSpeed1);
           pwmValue2 = pid2.computePulseWidth(currentSpeed2);
 
