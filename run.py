@@ -116,8 +116,13 @@ class BLDC:
 class TUSC:
 	LIN_ACT_IN_1_PIN = 22
 	LIN_ACT_IN_2_PIN = 27
-	PWM_PIN_L = 13
-	PWM_PIN_R = 12
+	STEER_MODE_LED_PIN = 23
+	TANK_MODE_LED_PIN = 24
+	GEAR_1_LED_PIN = 6
+	GEAR_2_LED_PIN = 13
+	GEAR_3_LED_PIN = 19
+	GEAR_4_LED_PIN = 26
+
 	SCALARS = [20, 40, 60, 80]
 	LIN_ACT_COUNT = 100
 	DEFAULT_SENSITIVITY = 0.2
@@ -170,8 +175,40 @@ class TUSC:
 	def reset_trim(self):
 		self.bldc_L.trim = 0
 		self.bldc_R.trim = 0
+	
+	def led_control(self):
+		if self.mode == STEER:
+			self.pi.write(self.STEER_MODE_LED_PIN, HIGH)
+			self.pi.write(self.TANK_MODE_LED_PIN, LOW)
+		elif self.mode == TANK:
+			self.pi.write(self.STEER_MODE_LED_PIN, LOW)
+			self.pi.write(self.TANK_MODE_LED_PIN, HIGH)
+		
+		if self.gear == 1:
+			self.pi.write(self.GEAR_1_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_2_LED_PIN, LOW)
+			self.pi.write(self.GEAR_3_LED_PIN, LOW)
+			self.pi.write(self.GEAR_4_LED_PIN, LOW)
+		elif self.gear == 2:
+			self.pi.write(self.GEAR_1_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_2_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_3_LED_PIN, LOW)
+			self.pi.write(self.GEAR_4_LED_PIN, LOW)
+		elif self.gear == 3:
+			self.pi.write(self.GEAR_1_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_2_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_3_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_4_LED_PIN, LOW)
+		elif self.gear == 4:
+			self.pi.write(self.GEAR_1_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_2_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_3_LED_PIN, HIGH)
+			self.pi.write(self.GEAR_4_LED_PIN, HIGH)
+
 
 	def set_speed(self,input, steer_UD=None, steer_LR=None):
+		# LED control
+		self.led_control()
 
 		if steer_UD == None and steer_LR == None:
 			self.bldc_L.set_speed(input, self.scalar)
@@ -263,7 +300,7 @@ def main():
 			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R) 
 			# Create and send data packet
 			packet = Packet(ser)
-			packet.create(tusc.mode, tusc.gear, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
+			packet.create(int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
 			packet.send()
 
 			if ser.in_waiting > 0:
@@ -280,7 +317,7 @@ def main():
 					tusc.set_speed(0, 0)
 					tusc.mode = STEER
 					tusc.gear = 1
-					packet.create(tusc.mode, tusc.gear, 0, 0)
+					packet.create(0, 0)
 					packet.send()
 					tusc.pi.stop()
 					pygame.quit()
@@ -367,7 +404,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(tusc.mode, tusc.gear, 0, 0)
+		packet.create(0, 0)
 		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
@@ -376,7 +413,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(tusc.mode, tusc.gear, 0, 0)
+		packet.create(0, 0)
 		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
