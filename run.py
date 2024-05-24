@@ -322,6 +322,7 @@ def main():
 					tusc.gear = 1
 					packet.create(STOP, 0, 0)
 					packet.send()
+					ser.close()
 					tusc.pi.stop()
 					pygame.quit()
 					exit()
@@ -340,6 +341,7 @@ def main():
 						tusc.gear = 1
 						packet.create(STOP, 0, 0)
 						packet.send()
+						ser.close()
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -409,6 +411,7 @@ def main():
 		tusc.gear = 1
 		packet.create(STOP, 0, 0)
 		packet.send()
+		ser.close()
 		tusc.pi.stop()
 		pygame.quit()
 
@@ -418,6 +421,7 @@ def main():
 		tusc.gear = 1
 		packet.create(STOP, 0, 0)
 		packet.send()
+		ser.close()
 		tusc.pi.stop()
 		pygame.quit()
 
