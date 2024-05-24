@@ -317,7 +317,7 @@ def main():
 					tusc.set_speed(0, 0)
 					tusc.mode = STEER
 					tusc.gear = 1
-					packet.create(tusc.mode, tusc.gear, 0, 0)
+					packet.create(0, 0)
 					packet.send()
 					tusc.pi.stop()
 					pygame.quit()
@@ -404,7 +404,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(tusc.mode, tusc.gear, 0, 0)
+		packet.create(0, 0)
 		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
@@ -413,7 +413,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(tusc.mode, tusc.gear, 0, 0)
+		packet.create(0, 0)
 		packet.send()
 		tusc.pi.stop()
 		pygame.quit()
