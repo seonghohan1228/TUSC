@@ -34,6 +34,9 @@ float currentSpeed2 = 0;
 
 float stop_threshold = 30;
 
+uint8_t status = 1; // 0: OFF, 1: ON
+uint8_t pid = 1; // 0: DISABLED, 1: ENABLED
+
 // ESC instances
 Servo ESC_L;
 Servo ESC_R;
@@ -49,8 +52,16 @@ PID pid2(KP2, KI2, KD2, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
 
 void slipDetection()
 {
-  digitalWrite(LEDPin0, HIGH);
-  digitalWrite(LEDPin1, HIGH);
+  if (pid == 1 && status == 1)
+  {
+    digitalWrite(LEDPin0, HIGH);
+    digitalWrite(LEDPin1, HIGH);
+  }
+  else
+  {
+    digitalWrite(LEDPin0, LOW);
+    digitalWrite(LEDPin1, LOW);
+  }
 }
 
 
@@ -82,8 +93,8 @@ void loop()
   static byte buffer[PACKET_SIZE];
   static int buffer_index = 0;
 
-  static float pwmValue1;
-  static float pwmValue2;
+  static float pwmValue1 = IDLE_PULSEWIDTH;
+  static float pwmValue2 = IDLE_PULSEWIDTH;
 
   while (Serial.available())
   {
@@ -109,36 +120,50 @@ void loop()
         // Check validity of packet
         if (packetIsValid(packet))
         {
-          uint8_t mode = packet[1]; // 0: STOP, 1: RUN
+          status = packet[1]; // 0: OFF, 1: ON
+          pid = packet[2]; // 0: DISABLED, 1: ENABLED
 
-          if (mode == 0)
-          {
-            ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
-            ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
-            exit(0);
-          }
+          int16_t speed_L = (packet[3] << 8) | packet[4]; // Higher byte | Lower byte
+          int16_t speed_R = (packet[5] << 8) | packet[6];
 
-          int16_t speed_L = (packet[2] << 8) | packet[3]; // Higher byte | Lower byte
-          int16_t speed_R = (packet[4] << 8) | packet[5];
-
+          // Convert input speed (-100 ~ 100) to rpm (-5000 ~ 5000)
           speed_L = map(speed_L, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
           speed_R = map(speed_R, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
+
+          currentSpeed1 = pid1.readRPM(sen1);
+          currentSpeed2 = pid2.readRPM(sen2);
           
           pid1.goalVelocity(speed_L);
           pid2.goalVelocity(speed_R);
 
-          currentSpeed1 = pid1.readRPM(sen1);
-          currentSpeed2 = pid2.readRPM(sen2);
           pwmValue1 = pid1.computePulseWidth(currentSpeed1);
           pwmValue2 = pid2.computePulseWidth(currentSpeed2);
 
-          // Stabilizing stop
-          if (abs(targetSpeed1) < stop_threshold)
-            ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
-          if (abs(targetSpeed2) < stop_threshold)
-            ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
+          delay(2); // Due to encoder sampling rate
 
-          // Print filtered velocity
+          if (pid == 0)
+          {
+            pwmValue1 = map(speed_L, -MAX_VELOCITY, MAX_VELOCITY, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
+            pwmValue2 = map(speed_R, -MAX_VELOCITY, MAX_VELOCITY, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
+          }
+
+          if (status == 0) // Turn off
+          {
+            pwmValue1 = IDLE_PULSEWIDTH;
+            pwmValue2 = IDLE_PULSEWIDTH;
+            ESC_L.writeMicroseconds(pwmValue1);
+            ESC_R.writeMicroseconds(pwmValue2);
+            slipDetection();
+            while(1) {}
+          }
+
+          ESC_L.writeMicroseconds(pwmValue1);
+          ESC_R.writeMicroseconds(pwmValue2);
+          
+          Serial.print(status);
+          Serial.print(" ");
+          Serial.print(pid);
+          Serial.print(" ");
           Serial.print(speed_L);
           Serial.print(" ");
           Serial.print(pid1.get_Velocity());
@@ -151,12 +176,7 @@ void loop()
           Serial.print(" ");
           Serial.println(pwmValue2);
 
-          ESC_L.writeMicroseconds(pwmValue1);
-          ESC_R.writeMicroseconds(pwmValue2);
-
           slipDetection();
-
-          delay(2);
         }
 
         buffer_index = 0;
