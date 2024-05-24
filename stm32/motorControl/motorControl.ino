@@ -17,15 +17,21 @@ const int MIN_PULSEWIDTH = 1000;
 const int IDLE_PULSEWIDTH = 1500;
 const int MAX_PULSEWIDTH = 2000;
 
-float targetSpeed1 = 3000.0;
-float targetSpeed2 = 3000.0;
+// Maxmum velocity in rpm
+const int MAX_VELOCITY = 5000;
+
+// remote Input range
+const int INPUT_RANGE = 100;
+
+float targetSpeed1 = 0;
+float targetSpeed2 = 0;
 float currentSpeed1 = 0;
 float currentSpeed2 = 0;
 
 float stop_threshold = 30;
 
 // ESC instances
-Servo ESC_L;    
+Servo ESC_L;
 Servo ESC_R;
 
 // I2C instances
@@ -46,7 +52,7 @@ void setup()
   // Encoders
   sen1.begin();
   sen2.begin();
-  
+
   // PWM pins for ESCs
   ESC_L.attach(PA0, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
   ESC_R.attach(PA1, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
@@ -63,7 +69,7 @@ void loop()
 
   static float pwmValue1;
   static float pwmValue2;
-  
+
   while (Serial.available())
   {
     byte incoming_byte = Serial.read();
@@ -75,7 +81,7 @@ void loop()
         buffer[buffer_index++] = incoming_byte;
       }
     }
-    
+
     else
     {
       buffer[buffer_index++] = incoming_byte;
@@ -84,36 +90,37 @@ void loop()
         // Read incoming bytes
         uint8_t packet[PACKET_SIZE];
         Serial.readBytes(packet, PACKET_SIZE);
-        
+
         // Check validity of packet
         if (packetIsValid(packet))
         {
           uint8_t mode = packet[1];
           uint8_t gear = packet[2];
-          int16_t speed_L = (packet[3] << 8) | packet[4];  // Higher byte | Lower byte
+          int16_t speed_L = (packet[3] << 8) | packet[4]; // Higher byte | Lower byte
           int16_t speed_R = (packet[5] << 8) | packet[6];
-          
+
+          pwmValue1 = map(speed_L, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
+          pwmValue2 = map(speed_R, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
+
           pid1.goalVelocity(speed_L);
           pid2.goalVelocity(speed_R);
-          
+
           currentSpeed1 = pid1.readRPM(sen1);
           currentSpeed2 = pid2.readRPM(sen2);
           pwmValue1 = pid1.computePulseWidth(currentSpeed1);
           pwmValue2 = pid2.computePulseWidth(currentSpeed2);
-          pwmValue1 = map(speed_L, -100, 100, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
-          pwmValue2 = map(speed_R, -100, 100, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
-          
+
           // Stabilizing stop
           if (abs(targetSpeed1) < stop_threshold)
             ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
           if (abs(targetSpeed2) < stop_threshold)
             ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
-          
+
           // Print filtered velocity
           Serial.print(pid1.get_Velocity());
           Serial.print(" ");
           Serial.println(pid2.get_Velocity());
-          
+
           ESC_L.writeMicroseconds(pwmValue1);
           ESC_R.writeMicroseconds(pwmValue2);
           delay(2);
@@ -126,4 +133,3 @@ void loop()
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
