@@ -9,9 +9,9 @@ class Packet:
     # Define start and end bytes
     START_BYTE = 0x02
     END_BYTE = 0x03
-    LENGTH = 7  # bytes
+    LENGTH = 9  # bytes
     PAYLOAD_STRUCTURE = ">BBhh"
-    PACKET_STRUCTURE = ">B7sBB"
+    PACKET_STRUCTURE = ">B6sBB"
 
     def __init__(self, serial_connection):
         self.serial_connection = serial_connection
