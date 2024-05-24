@@ -12,6 +12,10 @@
 const int STEER = 0;
 const int TANK = 1;
 
+// LED pins
+const int LEDPin0 = PB6;
+const int LEDPin1 = PA4;
+
 // Pulsewidth; units are in ms
 const int MIN_PULSEWIDTH = 1000;
 const int IDLE_PULSEWIDTH = 1500;
@@ -36,6 +40,14 @@ TwoWire sen2(PB5, PA8);
 PID pid1(KP1, KI1, KD1, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
 PID pid2(KP2, KI2, KD2, MIN_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
 
+
+void slipDetection()
+{
+  digitalWrite(LEDPin0, HIGH);
+  digitalWrite(LEDPin1, HIGH);
+}
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 void setup()
@@ -50,6 +62,9 @@ void setup()
   // PWM pins for ESCs
   ESC_L.attach(PA0, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
   ESC_R.attach(PA1, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
+
+  pinMode(LEDPin0, OUTPUT);
+  pinMode(LEDPin1, OUTPUT);
 
   // Set speed to 0 (Idle)
   ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
@@ -114,6 +129,9 @@ void loop()
           
           ESC_L.writeMicroseconds(pwmValue1);
           ESC_R.writeMicroseconds(pwmValue2);
+
+          slipDetection();
+
           delay(2);
         }
 
