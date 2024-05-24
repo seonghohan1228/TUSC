@@ -88,10 +88,8 @@ void loop()
         // Check validity of packet
         if (packetIsValid(packet))
         {
-          uint8_t mode = packet[1];
-          uint8_t gear = packet[2];
-          int16_t speed_L = (packet[3] << 8) | packet[4];  // Higher byte | Lower byte
-          int16_t speed_R = (packet[5] << 8) | packet[6];
+          int16_t speed_L = (packet[1] << 8) | packet[2];  // Higher byte | Lower byte
+          int16_t speed_R = (packet[3] << 8) | packet[4];
           
           pid1.goalVelocity(speed_L);
           pid2.goalVelocity(speed_R);
