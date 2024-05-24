@@ -4,6 +4,9 @@
 #define PACKET_HPP
 #include <queue>
 
+static const int PID_FILTER_SIZE = 10;
+static const int RPM_FILTER_SIZE = 30;
+
 // PID
 float KP1 = 0.03;
 float KI1 = 0.60;
@@ -74,19 +77,25 @@ private:
   float previousAngle;
   unsigned long previousMicros;
 
-  float antiwind_Threshold = 400; // Integral anti-windup 기준값
+  float antiwind_Threshold; // Integral anti-windup 기준값
   unsigned long previousTime;
 
-  int PID_filter_Size = 10;
-  int RPM_filter_Size = 30;
   MovingAverageFilter pidFilter;
   MovingAverageFilter rpmFilter;
 
 public:
-  PID(float p, float i, float d, float min, float max, float stop) : kp(p), ki(i), kd(d), max_Val(max), min_Val(min), stop_Val(stop), previousError(0), integral(0), goal(0), filtered_velocity(0), previousTime(0), pidFilter(PID_filter_Size), rpmFilter(RPM_filter_Size)
+  PID(float p, float i, float d, float min, float max, float stop) : kp(p), ki(i), kd(d), max_Val(max), min_Val(min), stop_Val(stop), pidFilter(PID_FILTER_SIZE), rpmFilter(RPM_FILTER_SIZE)
   {
+    integral = 0;
+    goal = 0;
+    filtered_velocity = 0;
+
+    previousTime = 0;
     previousAngle = 0.0;
     previousMicros = 0;
+    previousError = 0;
+
+    antiwind_Threshold = 400;
   }
 
   /*
