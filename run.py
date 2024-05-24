@@ -300,7 +300,7 @@ def main():
 			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R) 
 			# Create and send data packet
 			packet = Packet(ser)
-			packet.create(tusc.mode, tusc.gear, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
+			packet.create(int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
 			packet.send()
 
 			if ser.in_waiting > 0:
