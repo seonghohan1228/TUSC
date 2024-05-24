@@ -99,14 +99,14 @@ void loop()
           int16_t speed_L = (packet[3] << 8) | packet[4]; // Higher byte | Lower byte
           int16_t speed_R = (packet[5] << 8) | packet[6];
 
-          pwmValue1 = map(speed_L, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
-          pwmValue2 = map(speed_R, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
+          speed_L = map(speed_L, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
+          speed_R = map(speed_R, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
 
           pid1.goalVelocity(speed_L);
           pid2.goalVelocity(speed_R);
 
           currentSpeed1 = pid1.readRPM(sen1);
-          currentSpeed2 = pid2.readRPM(sen2);
+          currentSpeed2 = -pid2.readRPM(sen2);
           pwmValue1 = pid1.computePulseWidth(currentSpeed1);
           pwmValue2 = pid2.computePulseWidth(currentSpeed2);
 
