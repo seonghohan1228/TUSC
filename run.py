@@ -132,10 +132,12 @@ class TUSC:
 	GEAR_2_LED_PIN = 13
 	GEAR_3_LED_PIN = 19
 	GEAR_4_LED_PIN = 26
-	KP_L = 0.1
+	KP_L = 0
 	KI_L = 0
-	KP_R = 0.1
+	KP_R = 0
 	KI_R = 0
+	KP_scalar = 0.05
+	KI_scalar = 0.02
 
 	SCALARS = [20, 40, 60, 80]
 	LIN_ACT_COUNT = 100
@@ -344,10 +346,10 @@ def main():
 					
 					f = open('test.csv', 'w', encoding='utf-8')
 					wr = csv.writer(f)
-					wr.writerow(['KP_L', tusc.KP_L])
-					wr.writerow(['KI_L', tusc.KI_L])
-					wr.writerow(['KP_R', tusc.KP_R])
-					wr.writerow(['KI_R', tusc.KI_R])
+					wr.writerow(['KP_L', tusc.KP_L*tusc.KP_scalar])
+					wr.writerow(['KI_L', tusc.KI_L*tusc.KI_scalar])
+					wr.writerow(['KP_R', tusc.KP_R*tusc.KP_scalar])
+					wr.writerow(['KI_R', tusc.KI_R*tusc.KI_scalar])
 					f.close()
 					
 					time.sleep(0.01)
@@ -375,10 +377,10 @@ def main():
 					
 						f = open('test.csv', 'w', encoding='utf-8')
 						wr = csv.writer(f)
-						wr.writerow(['KP_L', tusc.KP_L])
-						wr.writerow(['KI_L', tusc.KI_L])
-						wr.writerow(['KP_R', tusc.KP_R])
-						wr.writerow(['KI_R', tusc.KI_R])
+						wr.writerow(['KP_L', tusc.KP_L*tusc.KP_scalar])
+						wr.writerow(['KI_L', tusc.KI_L*tusc.KI_scalar])
+						wr.writerow(['KP_R', tusc.KP_R*tusc.KP_scalar])
+						wr.writerow(['KI_R', tusc.KI_R*tusc.KI_scalar])
 						f.close()
 						
 						time.sleep(0.01)
@@ -400,19 +402,19 @@ def main():
 
 					# KP increment
 					if joystick.get_button(ps4_buttons["square"]):
-						tusc.KI_L -= 0.02
-						tusc.KI_R -= 0.02
+						tusc.KI_L -= 1
+						tusc.KI_R -= 1
 					if joystick.get_button(ps4_buttons["triangle"]):
-						tusc.KI_L += 0.02
-						tusc.KI_R += 0.02
+						tusc.KI_L += 1
+						tusc.KI_R += 1
 
 					# KI increment
 					if joystick.get_button(ps4_buttons["cross"]):
-						tusc.KI_L -= 0.02
-						tusc.KI_R -= 0.02
+						tusc.KI_L -= 1
+						tusc.KI_R -= 1
 					if joystick.get_button(ps4_buttons["circle"]):
-						tusc.KI_L += 0.02
-						tusc.KI_R += 0.02
+						tusc.KI_L += 1
+						tusc.KI_R += 1
 
 					# Toggle PID control on/off if L stick is pressed
 					if joystick.get_button(ps4_buttons["L stick in"]):
@@ -493,10 +495,10 @@ def main():
 		
 		f = open('test.csv', 'w', encoding='utf-8')
 		wr = csv.writer(f)
-		wr.writerow(['KP_L', tusc.KP_L])
-		wr.writerow(['KI_L', tusc.KI_L])
-		wr.writerow(['KP_R', tusc.KP_R])
-		wr.writerow(['KI_R', tusc.KI_R])
+		wr.writerow(['KP_L', tusc.KP_L*tusc.KP_scalar])
+		wr.writerow(['KI_L', tusc.KI_L*tusc.KI_scalar])
+		wr.writerow(['KP_R', tusc.KP_R*tusc.KP_scalar])
+		wr.writerow(['KI_R', tusc.KI_R*tusc.KI_scalar])
 		f.close()
 		
 		time.sleep(0.01)
@@ -515,10 +517,10 @@ def main():
 		
 		f = open('test.csv', 'w', encoding='utf-8')
 		wr = csv.writer(f)
-		wr.writerow(['KP_L', tusc.KP_L])
-		wr.writerow(['KI_L', tusc.KI_L])
-		wr.writerow(['KP_R', tusc.KP_R])
-		wr.writerow(['KI_R', tusc.KI_R])
+		wr.writerow(['KP_L', tusc.KP_L*tusc.KP_scalar])
+		wr.writerow(['KI_L', tusc.KI_L*tusc.KI_scalar])
+		wr.writerow(['KP_R', tusc.KP_R*tusc.KP_scalar])
+		wr.writerow(['KI_R', tusc.KI_R*tusc.KI_scalar])
 		f.close()
 		
 		time.sleep(0.01)
