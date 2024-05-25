@@ -103,7 +103,7 @@ void TIM_IT_Handler()
 {
   if (pid1.readRPM(sen1) == COM_FAIL)
     NVIC_SystemReset();
-  if (pid1.readRPM(sen2) == COM_FAIL)
+  if (pid2.readRPM(sen2) == COM_FAIL)
     NVIC_SystemReset();
 }
 
