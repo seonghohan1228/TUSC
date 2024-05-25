@@ -3,8 +3,6 @@
 #ifndef PACKET_HPP
 #define PACKET_HPP
 #include <queue>
-#include "encoder.h"
-#include <Wire.h>
 
 static const int PID_FILTER_SIZE = 10;
 static const int RPM_FILTER_SIZE = 30;
@@ -12,11 +10,11 @@ static const int RPM_FILTER_SIZE = 30;
 // PID
 float KP1 = 0.1;
 float KI1 = 0;
-float KD1 = 0;
+float KD1 = 0.00;
 
 float KP2 = 0.1;
 float KI2 = 0;
-float KD2 = 0;
+float KD2 = 0.00;
 
 /*
 @brief moving average filter
@@ -49,11 +47,12 @@ public:
     }
     return sum / window.size();
   }
-
-  void clear_Queue()
+  void pop()
   {
-    while (!window.empty())
+    for (int i = 0; window.size() > i; i++)
+    {
       window.pop();
+    }
   }
 };
 
@@ -104,18 +103,6 @@ public:
     previousError = 0;
 
     antiwind_Threshold = 400;
-  }
-
-  void set_Parameter(float p, float i, float d)
-  {
-    kp = p;
-    ki = i;
-    kd = d;
-    integral = 0;
-    filtered_velocity = 0;
-    previousError = 0;
-    pidFilter.clear_Queue();
-    rpmFilter.clear_Queue();
   }
 
   /*
