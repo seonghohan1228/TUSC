@@ -132,6 +132,10 @@ class TUSC:
 	GEAR_2_LED_PIN = 13
 	GEAR_3_LED_PIN = 19
 	GEAR_4_LED_PIN = 26
+	KP_L = 0.1
+	KI_L = 0
+	KP_R = 0.1
+	KI_R = 0
 
 	SCALARS = [20, 40, 60, 80]
 	LIN_ACT_COUNT = 100
@@ -316,7 +320,7 @@ def main():
 			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R) 
 			# Create and send data packet
 			packet = Packet(ser)
-			packet.create(ON, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
+			packet.create(ON, tusc.pid, tusc.KP_L, tusc.KI_L, tusc.KP_R, tusc.KI_R, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
 			packet.send()
 
 			if ser.in_waiting > 0:
@@ -333,7 +337,7 @@ def main():
 					tusc.set_speed(0, 0)
 					tusc.mode = STEER
 					tusc.gear = 1
-					packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
+					packet.create(OFF, tusc.pid, tusc.KP_L, tusc.KI_L, tusc.KP_R, tusc.KI_R, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
 					packet.send()
 					packet.send()
 					packet.send()
@@ -355,7 +359,7 @@ def main():
 						tusc.set_speed(0)
 						tusc.mode = STEER
 						tusc.gear = 1
-						packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
+						packet.create(OFF, tusc.pid, tusc.KP_L, tusc.KI_L, tusc.KP_R, tusc.KI_R, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
 						packet.send()
 						packet.send()
 						packet.send()
@@ -376,15 +380,21 @@ def main():
 						tusc.lin_act.counter = 0  # Reset counter
 						tusc.lin_act.joystick_control = False
 
-					# Flipper switches direction if R stick is pressed
+					# KP increment
+					if joystick.get_button(ps4_buttons["square"]):
+						tusc.KI_L -= 0.02
+						tusc.KI_R -= 0.02
+					if joystick.get_button(ps4_buttons["triangle"]):
+						tusc.KI_L += 0.02
+						tusc.KI_R += 0.02
+
+					# KI increment
 					if joystick.get_button(ps4_buttons["cross"]):
-						# If linear actuator has stopped, set to extend
-						if tusc.lin_act.in_1_val == LOW and tusc.lin_act.in_2_val == LOW:
-							tusc.lin_act.extend()
-						else:
-							tusc.lin_act.flip_direction()
-						tusc.lin_act.counter = 0
-						tusc.lin_act.joystick_control = True
+						tusc.KI_L -= 0.02
+						tusc.KI_R -= 0.02
+					if joystick.get_button(ps4_buttons["circle"]):
+						tusc.KI_L += 0.02
+						tusc.KI_R += 0.02
 
 					# Toggle PID control on/off if L stick is pressed
 					if joystick.get_button(ps4_buttons["L stick in"]):
@@ -458,7 +468,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
+		packet.create(OFF, tusc.pid, tusc.KP_L, tusc.KI_L, tusc.KP_R, tusc.KI_R, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
 		packet.send()
 		packet.send()
 		packet.send()
@@ -471,7 +481,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
+		packet.create(OFF, tusc.pid, tusc.KP_L, tusc.KI_L, tusc.KP_R, tusc.KI_R, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
 		packet.send()
 		packet.send()
 		packet.send()
