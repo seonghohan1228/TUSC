@@ -54,7 +54,6 @@ TwoWire sen2(PB5, PA8);
 PID pid1(KP1, KI1, KD1, IDLE_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
 PID pid2(KP2, KI2, KD2, IDLE_PULSEWIDTH, MAX_PULSEWIDTH, IDLE_PULSEWIDTH);
 
-
 void ledControl()
 {
   if (!pidEnable)
@@ -81,7 +80,6 @@ void ledControl()
   }
 }
 
-
 void sendStatus()
 {
   // Format the data as a compact string
@@ -100,6 +98,11 @@ void sendStatus()
   Serial.println();
 }
 
+void TIM_IT_Handler()
+{
+  pid1.readRPM(sen1);
+  pid2.readRPM(sen2);
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -107,13 +110,24 @@ void setup()
 {
   // Initialize Serial communication at 115200 baud rate
   Serial.begin(115200);
-  
+
   // Wait for the serial port to be ready
-  while (!Serial);
+  while (!Serial)
+    ;
 
   // Encoders
+  sen1.setClock(1000000);
+  sen2.setClock(1000000);
   sen1.begin();
   sen2.begin();
+  if (setFTH(sen1, 0x07) == COM_SUCCESS) // Encoder filter setting
+    Serial.println("FTH set successfully");
+  else
+    Serial.println("Failed to set FTH");
+  if (setFTH(sen2, 0x07) == COM_SUCCESS)
+    Serial.println("FTH set successfully");
+  else
+    Serial.println("Failed to set FTH");
 
   // PWM pins for ESCs
   ESC_L.attach(PA0, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
@@ -125,6 +139,13 @@ void setup()
   // Set speed to 0 (Idle)
   ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
   ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
+
+  // Set timer interrupt
+  TIM_TypeDef *Instance = TIM1;
+  HardwareTimer *MyTim = new HardwareTimer(Instance);
+  MyTim->setOverflow(1000, HERTZ_FORMAT); // set to 1kHz sampling
+  MyTim->attachInterrupt(TIM_IT_Handler);
+  MyTim->resume();
 }
 
 void loop()
@@ -163,7 +184,7 @@ void loop()
           inputLeftSpeed = (packet[3] << 8) | packet[4];
           inputRightSpeed = (packet[5] << 8) | packet[6];
 
-          if (!tuscOn)  // TUSC is turned off
+          if (!tuscOn) // TUSC is turned off
           {
             ESC_L.writeMicroseconds(IDLE_PULSEWIDTH);
             ESC_R.writeMicroseconds(IDLE_PULSEWIDTH);
@@ -177,16 +198,16 @@ void loop()
           targetLeftSpeed = map(inputLeftSpeed, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
           targetRightSpeed = map(inputRightSpeed, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
 
-          currentLeftSpeed = pid1.readRPM(sen1);
-          currentRightSpeed = pid2.readRPM(sen2);
-          
-          pid1.goalVelocity(currentLeftSpeed);
-          pid2.goalVelocity(currentRightSpeed);
+          currentLeftSpeed = pid1.get_Velocity();
+          currentRightSpeed = pid2.get_Velocity();
+
+          pid1.goalVelocity(targetLeftSpeed);
+          pid2.goalVelocity(targetRightSpeed);
 
           if (pidEnable)
           {
-            leftPWM = pid1.computePulseWidth(currentLeftSpeed);
-            rightPWM = pid2.computePulseWidth(currentRightSpeed);
+            leftPWM = pid1.computePulseWidth();
+            rightPWM = pid2.computePulseWidth();
           }
           else
           {
@@ -196,11 +217,9 @@ void loop()
 
           ESC_L.writeMicroseconds(leftPWM);
           ESC_R.writeMicroseconds(rightPWM);
-          
+
           sendStatus();
           ledControl();
-
-          delay(2);
         }
 
         bufferIndex = 0;

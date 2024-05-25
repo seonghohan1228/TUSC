@@ -173,7 +173,7 @@ public:
     // Update previous values
     previousAngle = currentAngle;
     previousMicros = currentMicros;
-
+    filtered_velocity = rpmFilter.add(rpm);
     return rpm;
   }
 
@@ -182,10 +182,9 @@ public:
      @param input float : current speed
      @return float : calculated PWM pulse width
      */
-  float computePulseWidth(float input)
+  float computePulseWidth()
   {
-    unsigned long currentTime = micros();     // us
-    filtered_velocity = rpmFilter.add(input); // filtered velocity
+    unsigned long currentTime = micros(); // us
     float dt = (currentTime - previousTime) / 1000000.0;
 
     if (dt == 0)
@@ -195,7 +194,6 @@ public:
     integral += error * dt;                          // I
     float derivative = (error - previousError) / dt; // D
 
-    // prevent drift at init
     if (abs(goal) < 5)
       integral = 0;
 
