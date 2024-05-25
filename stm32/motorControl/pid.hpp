@@ -216,12 +216,6 @@ public:
 
     return value;
   }
-
-  void clear()
-  {
-    rpmFilter.pop();
-    pidFilter.pop();
-  }
 };
 
 #endif
