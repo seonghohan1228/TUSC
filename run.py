@@ -2,7 +2,6 @@ import pigpio
 import pygame
 import time
 import serial
-import struct
 from packet import Packet
 import math
 

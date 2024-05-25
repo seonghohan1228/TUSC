@@ -8,13 +8,13 @@ static const int PID_FILTER_SIZE = 10;
 static const int RPM_FILTER_SIZE = 30;
 
 // PID
-float KP1 = 0.1;
-float KI1 = 0;
-float KD1 = 0.002;
+float KP1 = 0.04;
+float KI1 = 0.8;
+float KD1 = 0;
 
-float KP2 = 0.1;
-float KI2 = 0;
-float KD2 = 0.002;
+float KP2 = 0.04;
+float KI2 = 0.8;
+float KD2 = 0;
 
 /*
 @brief moving average filter
@@ -194,6 +194,10 @@ public:
     float error = goal - filtered_velocity;          // P
     integral += error * dt;                          // I
     float derivative = (error - previousError) / dt; // D
+
+    // prevent drift at init
+    if (abs(goal) < 5)
+      integral = 0;
 
     if (ki * integral > antiwind_Threshold) // anti-windup
       integral = antiwind_Threshold / ki;
