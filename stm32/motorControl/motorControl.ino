@@ -184,8 +184,8 @@ void loop()
           currentLeftSpeed = pid1.readRPM(sen1);
           currentRightSpeed = pid2.readRPM(sen2);
           
-          pid1.goalVelocity(currentLeftSpeed);
-          pid2.goalVelocity(currentRightSpeed);
+          pid1.goalVelocity(targetLeftSpeed);
+          pid2.goalVelocity(targetRightSpeed);
 
           if (pidEnable)
           {
