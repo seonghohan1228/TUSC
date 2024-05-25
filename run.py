@@ -68,12 +68,18 @@ class LinearActuator:
 		self.counter = 0
 		self.set_pins()
 
+		self.is_extend = False
+
 	def flip_direction(self):
 		# Prevent swapping LOW-LOW and HIGH-HIGH
 		if self.in_1_val != self.in_2_val:
 			temp = self.in_1_val
 			self.in_1_val = self.in_2_val
 			self.in_2_val = temp
+
+		if self.in_1_val == HIGH and self.in_2_val == LOW:
+			self.is_extend = True
+		
 		self.set_pins()
 
 	def retract(self):
@@ -382,6 +388,7 @@ def main():
 
 					# Flipper switches direction if R stick is pressed
 					if joystick.get_button(ps4_buttons["cross"]):
+						lin_act_extend_control_start_time = time.time_ns()
 						# If linear actuator has stopped, set to extend
 						if tusc.lin_act.in_1_val == LOW and tusc.lin_act.in_2_val == LOW:
 							tusc.lin_act.extend()
@@ -390,8 +397,10 @@ def main():
 						# tusc.lin_act.counter = 0 # Reset Counter
 						tusc.lin_act.joystick_control = True
 						# tusc.lin_act.joystick_control = False
-
 						# lin_act_joystick_control_start_time = current_time
+
+						
+						
 						
 
 					# Toggle PID control on/off if L stick is pressed
@@ -456,10 +465,17 @@ def main():
 			if tusc.lin_act.joystick_control == False:
 				# tusc.lin_act.counter += 1
 				# if tusc.lin_act.counter >= tusc.LIN_ACT_COUNT:
-				if current_time - lin_act_joystick_control_start_time >= 1e9: 
+				if current_time - lin_act_joystick_control_start_time >= 0.4*1e9: 
 					tusc.lin_act.stop()
 					# tusc.lin_act.counter = 0
 					tusc.lin_act.joystick_control = True
+
+			if tusc.lin_act.is_extend:
+				if current_time - lin_act_joystick_control_start_time >= 0.4*4.*1e9: 
+					tusc.lin_act.stop()
+					# tusc.lin_act.counter = 0
+					tusc.lin_act.is_extend = False
+
 
 
 	except KeyboardInterrupt:
