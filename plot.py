@@ -15,7 +15,7 @@ def print_response(target_value, current_value, max_value, n):
     else:
         for i in range(current):
             print("*", end="")
-        for i in range(current):
+        for i in range(target - current - 1):
             print(" ", end="")
         print("O")
 
