@@ -20,8 +20,8 @@ bool packetIsValid(uint8_t *packet)
     return false;
 
   // Verify checksum
-  uint8_t payload[] = {packet[1], packet[2], packet[3], packet[4], packet[5], packet[6]};
-  uint8_t checksum = calculateChecksum(payload, 6);
+  uint8_t payload[] = {packet[1], packet[2], packet[3], packet[4], packet[5], packet[6], packet[7], packet[8], packet[9], packet[10]};
+  uint8_t checksum = calculateChecksum(payload, 10);
   if (packet[PACKET_SIZE - 2] != checksum)
     return false;
 
