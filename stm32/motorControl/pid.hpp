@@ -3,6 +3,8 @@
 #ifndef PACKET_HPP
 #define PACKET_HPP
 #include <queue>
+#include "encoder.h"
+#include <Wire.h>
 
 static const int PID_FILTER_SIZE = 10;
 static const int RPM_FILTER_SIZE = 30;
@@ -47,12 +49,11 @@ public:
     }
     return sum / window.size();
   }
-  void pop()
+
+  void clear_Queue()
   {
-    for (int i = 0; window.size() > i; i++)
-    {
+    while (!window.empty())
       window.pop();
-    }
   }
 };
 
@@ -103,6 +104,18 @@ public:
     previousError = 0;
 
     antiwind_Threshold = 400;
+  }
+
+  void set_Parameter(float p, float i, float d)
+  {
+    kp = p;
+    ki = i;
+    kd = d;
+    integral = 0;
+    filtered_velocity = 0;
+    previousError = 0;
+    pidFilter.clear_Queue();
+    rpmFilter.clear_Queue();
   }
 
   /*
@@ -221,13 +234,7 @@ public:
     if (value < min_Val)
       value = min_Val;
 
-    return value;
-  }
-
-  void clear()
-  {
-    rpmFilter.pop();
-    pidFilter.pop();
+    return pidFilter.add(value);
   }
 };
 
