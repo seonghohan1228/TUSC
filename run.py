@@ -292,6 +292,8 @@ def main():
 		
 		# Main loop
 		while True:
+			current_time = time.time_ns()
+
 			# Get joystick angle (negative is forward)
 
 			speed_input = None
@@ -365,16 +367,16 @@ def main():
 						pygame.quit()
 						exit()
 					
-					# Flipper goes up
-					if joystick.get_button(ps4_buttons["up"]):
-						tusc.lin_act.retract()
-						tusc.lin_act.counter = 0  # Reset counter
-						tusc.lin_act.joystick_control = False
-					# Flipper goes down
-					elif joystick.get_button(ps4_buttons["down"]):
-						tusc.lin_act.extend()
-						tusc.lin_act.counter = 0  # Reset counter
-						tusc.lin_act.joystick_control = False
+					# # Flipper goes up
+					# if joystick.get_button(ps4_buttons["up"]):
+					# 	tusc.lin_act.retract()
+					# 	tusc.lin_act.counter = 0  # Reset counter
+					# 	tusc.lin_act.joystick_control = False
+					# # Flipper goes down
+					# elif joystick.get_button(ps4_buttons["down"]):
+					# 	tusc.lin_act.extend()
+					# 	tusc.lin_act.counter = 0  # Reset counter
+					# 	tusc.lin_act.joystick_control = False
 
 					# Flipper switches direction if R stick is pressed
 					if joystick.get_button(ps4_buttons["cross"]):
@@ -383,8 +385,12 @@ def main():
 							tusc.lin_act.extend()
 						else:
 							tusc.lin_act.flip_direction()
-						tusc.lin_act.counter = 0
-						tusc.lin_act.joystick_control = True
+						# tusc.lin_act.counter = 0 # Reset Counter
+						# tusc.lin_act.joystick_control = True
+						tusc.lin_act.joystick_control = False
+
+						lin_act_joystick_control_start_time = current_time
+						
 
 					# Toggle PID control on/off if L stick is pressed
 					if joystick.get_button(ps4_buttons["L stick in"]):
@@ -446,10 +452,11 @@ def main():
 			# ********** New Function for Flipper **********
 			
 			if tusc.lin_act.joystick_control == False:
-				tusc.lin_act.counter += 1
-				if tusc.lin_act.counter >= tusc.LIN_ACT_COUNT:
+				# tusc.lin_act.counter += 1
+				# if tusc.lin_act.counter >= tusc.LIN_ACT_COUNT:
+				if current_time - lin_act_joystick_control_start_time >= 1e9: 
 					tusc.lin_act.stop()
-					tusc.lin_act.counter = 0
+					# tusc.lin_act.counter = 0
 					tusc.lin_act.joystick_control = True
 
 
