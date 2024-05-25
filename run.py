@@ -344,10 +344,10 @@ def main():
 					
 					f = open('test.csv', 'w', encoding='utf-8')
 					wr = csv.writer(f)
-					wr.writerow([1, tusc.KP_L])
-					wr.writerow([2, tusc.KI_L])
-					wr.writerow([3, tusc.KP_R])
-					wr.writerow([4, tusc.KI_R])
+					wr.writerow(['KP_L', tusc.KP_L])
+					wr.writerow(['KI_L', tusc.KI_L])
+					wr.writerow(['KP_R', tusc.KP_R])
+					wr.writerow(['KI_R', tusc.KI_R])
 					f.close()
 					
 					time.sleep(0.01)
@@ -375,10 +375,10 @@ def main():
 					
 						f = open('test.csv', 'w', encoding='utf-8')
 						wr = csv.writer(f)
-						wr.writerow([1, tusc.KP_L])
-						wr.writerow([2, tusc.KI_L])
-						wr.writerow([3, tusc.KP_R])
-						wr.writerow([4, tusc.KI_R])
+						wr.writerow(['KP_L', tusc.KP_L])
+						wr.writerow(['KI_L', tusc.KI_L])
+						wr.writerow(['KP_R', tusc.KP_R])
+						wr.writerow(['KI_R', tusc.KI_R])
 						f.close()
 						
 						time.sleep(0.01)
@@ -493,10 +493,10 @@ def main():
 		
 		f = open('test.csv', 'w', encoding='utf-8')
 		wr = csv.writer(f)
-		wr.writerow([1, tusc.KP_L])
-		wr.writerow([2, tusc.KI_L])
-		wr.writerow([3, tusc.KP_R])
-		wr.writerow([4, tusc.KI_R])
+		wr.writerow(['KP_L', tusc.KP_L])
+		wr.writerow(['KI_L', tusc.KI_L])
+		wr.writerow(['KP_R', tusc.KP_R])
+		wr.writerow(['KI_R', tusc.KI_R])
 		f.close()
 		
 		time.sleep(0.01)
@@ -515,10 +515,10 @@ def main():
 		
 		f = open('test.csv', 'w', encoding='utf-8')
 		wr = csv.writer(f)
-		wr.writerow([1, tusc.KP_L])
-		wr.writerow([2, tusc.KI_L])
-		wr.writerow([3, tusc.KP_R])
-		wr.writerow([4, tusc.KI_R])
+		wr.writerow(['KP_L', tusc.KP_L])
+		wr.writerow(['KI_L', tusc.KI_L])
+		wr.writerow(['KP_R', tusc.KP_R])
+		wr.writerow(['KI_R', tusc.KI_R])
 		f.close()
 		
 		time.sleep(0.01)
