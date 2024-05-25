@@ -154,7 +154,7 @@ void loop()
             ESC_L.writeMicroseconds(pwmValue1);
             ESC_R.writeMicroseconds(pwmValue2);
             slipDetection();
-            while(1) {}
+            NVIC_SystemReset();
           }
 
           ESC_L.writeMicroseconds(pwmValue1);
