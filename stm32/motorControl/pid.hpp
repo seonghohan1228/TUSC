@@ -12,11 +12,11 @@ static const int RPM_FILTER_SIZE = 30;
 // PID
 float KP1 = 0.1;
 float KI1 = 0;
-float KD1 = 0.00;
+float KD1 = 0;
 
 float KP2 = 0.1;
 float KI2 = 0;
-float KD2 = 0.00;
+float KD2 = 0;
 
 /*
 @brief moving average filter
