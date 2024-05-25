@@ -122,8 +122,13 @@ void loop()
           status = packet[1]; // 0: OFF, 1: ON
           pid = packet[2]; // 0: DISABLED, 1: ENABLED
 
-          int16_t speed_L = (packet[3] << 8) | packet[4]; // Higher byte | Lower byte
-          int16_t speed_R = (packet[5] << 8) | packet[6];
+          int8_t kp_L = packet[3];
+          int8_t ki_L = packet[4];
+          int8_t kp_R = packet[5];
+          int8_t ki_R = packet[6];
+
+          int16_t speed_L = (packet[7] << 8) | packet[8]; // Higher byte | Lower byte
+          int16_t speed_R = (packet[9] << 8) | packet[10];
 
           // Convert input speed (-100 ~ 100) to rpm (-5000 ~ 5000)
           speed_L = map(speed_L, -INPUT_RANGE, INPUT_RANGE, -MAX_VELOCITY, MAX_VELOCITY);
@@ -132,13 +137,13 @@ void loop()
           currentSpeed1 = pid1.readRPM(sen1);
           currentSpeed2 = pid2.readRPM(sen2);
           
+          pid1.set_Parameter(kp_L, ki_L, 0);
+          pid2.set_Parameter(kp_R, ki_R, 0);
           pid1.goalVelocity(speed_L);
           pid2.goalVelocity(speed_R);
 
           pwmValue1 = pid1.computePulseWidth(currentSpeed1);
           pwmValue2 = pid2.computePulseWidth(currentSpeed2);
-
-          delay(2); // Due to encoder sampling rate
 
           if (pid == 0)
           {
@@ -163,6 +168,10 @@ void loop()
           Serial.print(" ");
           Serial.print(pid);
           Serial.print(" ");
+          Serial.print(kp_L);
+          Serial.print(" ");
+          Serial.print(ki_L);
+          Serial.print(" ");
           Serial.print(speed_L);
           Serial.print(" ");
           Serial.print(pid1.get_Velocity());
@@ -176,6 +185,7 @@ void loop()
           Serial.println(pwmValue2);
 
           slipDetection();
+          delay(2);
         }
 
         buffer_index = 0;
