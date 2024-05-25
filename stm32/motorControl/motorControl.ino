@@ -92,9 +92,13 @@ void sendStatus()
   Serial.print(" ");
   Serial.print(currentLeftSpeed);
   Serial.print(" ");
+  Serial.print(leftPWM);
+  Serial.print(" ");
   Serial.print(targetRightSpeed);
   Serial.print(" ");
   Serial.print(currentRightSpeed);
+  Serial.print(" ");
+  Serial.print(rightPWM);
   Serial.println();
 }
 
