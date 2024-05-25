@@ -3,8 +3,8 @@ MAX_SPEED = 5000  # rpm
 N_HEADER = 3
 
 def print_response(target_value, current_value, max_value, n):
-    target = n * target_value / max_value
-    current = n * current_value / max_value
+    target = int(n * target_value / max_value)
+    current = int(n * current_value / max_value)
     if target <= current:
         for i in range(target - 1):
             print("*", end='')
