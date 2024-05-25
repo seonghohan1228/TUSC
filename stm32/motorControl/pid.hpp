@@ -234,7 +234,7 @@ public:
     if (value < min_Val)
       value = min_Val;
 
-    return pidFilter.add(value);
+    return value;
   }
 };
 
