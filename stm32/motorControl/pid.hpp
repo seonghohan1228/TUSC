@@ -47,13 +47,6 @@ public:
     }
     return sum / window.size();
   }
-  void pop()
-  {
-    for (int i = 0; window.size() > i; i++)
-    {
-      window.pop();
-    }
-  }
 };
 
 /*
