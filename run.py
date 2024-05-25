@@ -2,7 +2,7 @@ import pigpio
 import pygame
 import time
 import serial
-import struct
+import csv
 from packet import Packet
 import math
 
@@ -341,6 +341,15 @@ def main():
 					packet.send()
 					packet.send()
 					packet.send()
+					
+					f = open('test.csv', 'w', encoding='utf-8')
+					wr = csv.writer(f)
+					wr.writerow([1, tusc.KP_L])
+					wr.writerow([2, tusc.KI_L])
+					wr.writerow([3, tusc.KP_R])
+					wr.writerow([4, tusc.KI_R])
+					f.close()
+					
 					time.sleep(0.01)
 					ser.close()
 					tusc.pi.stop()
@@ -363,6 +372,15 @@ def main():
 						packet.send()
 						packet.send()
 						packet.send()
+					
+						f = open('test.csv', 'w', encoding='utf-8')
+						wr = csv.writer(f)
+						wr.writerow([1, tusc.KP_L])
+						wr.writerow([2, tusc.KI_L])
+						wr.writerow([3, tusc.KP_R])
+						wr.writerow([4, tusc.KI_R])
+						f.close()
+						
 						time.sleep(0.01)
 						ser.close()
 						tusc.pi.stop()
@@ -472,6 +490,15 @@ def main():
 		packet.send()
 		packet.send()
 		packet.send()
+		
+		f = open('test.csv', 'w', encoding='utf-8')
+		wr = csv.writer(f)
+		wr.writerow([1, tusc.KP_L])
+		wr.writerow([2, tusc.KI_L])
+		wr.writerow([3, tusc.KP_R])
+		wr.writerow([4, tusc.KI_R])
+		f.close()
+		
 		time.sleep(0.01)
 		ser.close()
 		tusc.pi.stop()
@@ -485,6 +512,15 @@ def main():
 		packet.send()
 		packet.send()
 		packet.send()
+		
+		f = open('test.csv', 'w', encoding='utf-8')
+		wr = csv.writer(f)
+		wr.writerow([1, tusc.KP_L])
+		wr.writerow([2, tusc.KI_L])
+		wr.writerow([3, tusc.KP_R])
+		wr.writerow([4, tusc.KI_R])
+		f.close()
+		
 		time.sleep(0.01)
 		ser.close()
 		tusc.pi.stop()
