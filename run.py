@@ -61,6 +61,10 @@ class LinearActuator:
 		self.in_2_val = HIGH
 		# Controlled by joystick by default
 		self.joystick_control = True
+
+		# Controlled by joystick axis 
+		self.joystick_control_by_axis = False
+		
 		self.counter = 0
 		self.set_pins()
 
@@ -227,7 +231,7 @@ class TUSC:
 			mapped_input_R = steer_LR
 		
 		if self.mode == STEER:
-			interval = 0.5
+			interval = 0.5*self.sensitivity
 			forward = True if steer_UD >= 0 else False
 			
 			if steer_LR**2 + steer_UD**2 > 0.5**2:
@@ -235,9 +239,14 @@ class TUSC:
 			else:
 				angle = 0.
 			
-			mapped_input_L = max(-1., min(1. ,input + (-interval*angle*self.sensitivity) ))
-			mapped_input_R = max(-1., min(1. ,input + (+interval*angle*self.sensitivity) ))
-			
+			forth = True if input > 0. else False
+			stop = True if input == 0. else False
+
+			input_max = (1. if forth else 0.) if not stop else 1.
+			input_min = (0. if forth else -1.) if not stop else -1.
+
+			mapped_input_L = max(input_min, min(input_max,input + (-interval*angle) ))
+			mapped_input_R = max(input_min, min(input_max ,input + (+interval*angle) ))			
 
 		#print(f"mapped_intput_L: {mapped_input_L}")
 		#print(f"mapped_input_R: {mapped_input_R}")
@@ -368,7 +377,7 @@ def main():
 						tusc.lin_act.joystick_control = False
 
 					# Flipper switches direction if R stick is pressed
-					if joystick.get_button(ps4_buttons["R stick in"]):
+					if joystick.get_button(ps4_buttons["cross"]):
 						# If linear actuator has stopped, set to extend
 						if tusc.lin_act.in_1_val == LOW and tusc.lin_act.in_2_val == LOW:
 							tusc.lin_act.extend()
@@ -390,17 +399,19 @@ def main():
 					elif joystick.get_button(ps4_buttons["R1"]):
 						tusc.upshift()
 					
-					## Trimming
-	 				# Trim so that robot steers towards left
-					if joystick.get_button(ps4_buttons["square"]):
-						tusc.trim("L")
-	 				# Trim so that robot steers towards right
-					elif joystick.get_button(ps4_buttons["circle"]):
-						tusc.trim("R")
-					# Trim reset
-					elif joystick.get_button(ps4_buttons["options"]):
-						tusc.reset_trim()
+					# ## Trimming
+	 				# # Trim so that robot steers towards left
+					# if joystick.get_button(ps4_buttons["square"]):
+					# 	tusc.trim("L")
+	 				# # Trim so that robot steers towards right
+					# elif joystick.get_button(ps4_buttons["circle"]):
+					# 	tusc.trim("R")
+					# # Trim reset
+					# elif joystick.get_button(ps4_buttons["options"]):
+					# 	tusc.reset_trim()
 					
+				
+
 					## Sensitivity
 					if joystick.get_button(ps4_buttons["left"]):
 						tusc.decrease_sensitivity()
@@ -413,6 +424,27 @@ def main():
 					if joystick.get_button(ps4_buttons["touchpad"]):
 						tusc.switch_mode()
 
+			# ********** New Function for Flipper **********
+
+			# Flipper goes up
+			if tusc.mode == TANK:
+				up_down_flipper = -joystick.get_axis(ps4_axes["r_stick_v"])
+				print(f"up_down : {up_down_flipper}")
+
+				if up_down_flipper > 0.5:
+					tusc.lin_act.retract()
+					tusc.lin_act.joystick_control_by_axis = True
+				elif up_down_flipper < -0.5:
+					tusc.lin_act.extend()
+					tusc.lin_act.joystick_control_by_axis = True
+				
+
+				if up_down_flipper <= 0.5 and up_down_flipper >= -0.5 and tusc.lin_act.joystick_control_by_axis:
+					tusc.lin_act.stop()
+					tusc.lin_act.joystick_control_by_axis = False
+
+			# ********** New Function for Flipper **********
+			
 			if tusc.lin_act.joystick_control == False:
 				tusc.lin_act.counter += 1
 				if tusc.lin_act.counter >= tusc.LIN_ACT_COUNT:
