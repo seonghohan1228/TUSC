@@ -98,6 +98,7 @@ void sendStatus()
   Serial.println();
 }
 
+// timer interrupt handler
 void TIM_IT_Handler()
 {
   pid1.readRPM(sen1);
@@ -116,8 +117,8 @@ void setup()
     ;
 
   // Encoders
-  sen1.setClock(1000000);
-  sen2.setClock(1000000);
+  sen1.setClock(400000);
+  sen2.setClock(400000);
   sen1.begin();
   sen2.begin();
   if (setFTH(sen1, 0x07) == COM_SUCCESS) // Encoder filter setting
