@@ -367,16 +367,18 @@ def main():
 						pygame.quit()
 						exit()
 					
-					# # Flipper goes up
-					# if joystick.get_button(ps4_buttons["up"]):
-					# 	tusc.lin_act.retract()
-					# 	tusc.lin_act.counter = 0  # Reset counter
-					# 	tusc.lin_act.joystick_control = False
-					# # Flipper goes down
-					# elif joystick.get_button(ps4_buttons["down"]):
-					# 	tusc.lin_act.extend()
-					# 	tusc.lin_act.counter = 0  # Reset counter
-					# 	tusc.lin_act.joystick_control = False
+					# Flipper goes up
+					if joystick.get_button(ps4_buttons["up"]):
+						tusc.lin_act.retract()
+						# tusc.lin_act.counter = 0  # Reset counter
+						tusc.lin_act.joystick_control = False
+						lin_act_joystick_control_start_time = current_time
+					# Flipper goes down
+					elif joystick.get_button(ps4_buttons["down"]):
+						tusc.lin_act.extend()
+						# tusc.lin_act.counter = 0  # Reset counter
+						tusc.lin_act.joystick_control = False
+						lin_act_joystick_control_start_time = current_time
 
 					# Flipper switches direction if R stick is pressed
 					if joystick.get_button(ps4_buttons["cross"]):
@@ -386,10 +388,10 @@ def main():
 						else:
 							tusc.lin_act.flip_direction()
 						# tusc.lin_act.counter = 0 # Reset Counter
-						# tusc.lin_act.joystick_control = True
-						tusc.lin_act.joystick_control = False
+						tusc.lin_act.joystick_control = True
+						# tusc.lin_act.joystick_control = False
 
-						lin_act_joystick_control_start_time = current_time
+						# lin_act_joystick_control_start_time = current_time
 						
 
 					# Toggle PID control on/off if L stick is pressed
