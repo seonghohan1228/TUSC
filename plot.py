@@ -1,9 +1,6 @@
 N_DOTS = 80
 MAX_SPEED = 5000  # rpm
-
-
-file = open('tusc.log', 'r')
-Lines = file.readlines()
+N_HEADER = 3
 
 def print_response(target, current, max_value, n):
     if target <= current:
@@ -20,10 +17,14 @@ def print_response(target, current, max_value, n):
             print(" ", end="")
         print("O")
 
+file = open('tusc.log', 'r')
+Lines = file.readlines()
+
 
 # Strips the newline character
-for line in Lines:
-    line_list = line.strip().split()
-    target_speed = float(line_list[2])
-    current_speed = float(line_list[3])
-    print_response(target_speed, current_speed, MAX_SPEED, N_DOTS)
+for i, line in enumerate(Lines):
+    if i >= 3:
+        line_list = line.strip().split()
+        target_speed = float(line_list[2])
+        current_speed = float(line_list[3])
+        print_response(target_speed, current_speed, MAX_SPEED, N_DOTS)
