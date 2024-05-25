@@ -24,6 +24,6 @@ def print_response(target, current, max_value, n):
 # Strips the newline character
 for line in Lines:
     line_list = line.strip().split()
-    target_speed = line_list[2]
-    current_speed = line_list[3]
+    target_speed = float(line_list[2])
+    current_speed = float(line_list[3])
     print_response(target_speed, current_speed, MAX_SPEED, N_DOTS)
