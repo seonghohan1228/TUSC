@@ -101,8 +101,10 @@ void sendStatus()
 // timer interrupt handler
 void TIM_IT_Handler()
 {
-  pid1.readRPM(sen1);
-  pid2.readRPM(sen2);
+  if (pid1.readRPM(sen1) == COM_FAIL)
+    NVIC_SystemReset();
+  if (pid1.readRPM(sen2) == COM_FAIL)
+    NVIC_SystemReset();
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
