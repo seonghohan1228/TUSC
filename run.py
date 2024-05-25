@@ -319,8 +319,8 @@ def main():
 			packet.send()
 
 			if ser.in_waiting > 0:
-				line = ser.readline().decode('utf-8').rstrip().split()
-				print(line[4])
+				line = ser.readline().decode('utf-8').rstrip()
+				print(line)
 
             # Handle Pygame events
 			events = pygame.event.get()
