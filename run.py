@@ -402,11 +402,11 @@ def main():
 
 					# KP increment
 					if joystick.get_button(ps4_buttons["square"]):
-						tusc.KI_L -= 1
-						tusc.KI_R -= 1
+						tusc.KP_L -= 1
+						tusc.KP_R -= 1
 					if joystick.get_button(ps4_buttons["triangle"]):
-						tusc.KI_L += 1
-						tusc.KI_R += 1
+						tusc.KP_L += 1
+						tusc.KP_R += 1
 
 					# KI increment
 					if joystick.get_button(ps4_buttons["cross"]):
