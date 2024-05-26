@@ -372,7 +372,7 @@ def main():
 			# ********** New Function for Flipper **********
 
 			# Flipper goes up
-			if tusc.mode == TANK:
+			if tusc.mode == STEER:
 				up_down_flipper = -joystick.get_axis(ps4_axes["r_stick_v"])
 				#print(f"up_down : {up_down_flipper}")
 
