@@ -144,7 +144,7 @@ class TUSC:
 		self.lin_act = LinearActuator(self.pi, self.LIN_ACT_IN_1_PIN, \
 								  self.LIN_ACT_IN_2_PIN)
 		self.bldc_L = BLDC(self.pi, self.PWM_PIN_L, scalar=self.scalar)
-		self.bldc_R = BLDC(self.pi, self.PWM_PIN_L, scalar=self.scalar)
+		self.bldc_R = BLDC(self.pi, self.PWM_PIN_R, scalar=self.scalar)
 		self.sensitivity = self.DEFAULT_SENSITIVITY
 		self.mode = STEER
 		self.pid = ON
