@@ -33,21 +33,17 @@ def main():
         pi = pigpio.pi()
 
         while True:
-            # Handle Pygame events
-            events = pygame.event.get()
+            # Get joystick angle (negative is forward)
+            axis_value_L = -(joystick.get_axis(1))
+            axis_value_R = -(joystick.get_axis(3))
             
-            for event in events:
-                # Get joystick angle (negative is forward)
-                axis_value_L = -(joystick.get_axis(1))
-                axis_value_R = -(joystick.get_axis(3))
-                
-                pulsewidth_L = map_joystick(axis_value_L)
-                pulsewidth_R = map_joystick(axis_value_R)
+            pulsewidth_L = map_joystick(axis_value_L)
+            pulsewidth_R = map_joystick(axis_value_R)
 
-                print(f"Pulsewidth (L): {pulsewidth_L:4.2f}\tPulsewidth (R): {pulsewidth_R:4.2f}")
-                
-                pi.set_servo_pulsewidth(PWM_PIN_L, pulsewidth_L)
-                pi.set_servo_pulsewidth(PWM_PIN_R, pulsewidth_L)
+            print(f"Pulsewidth (L): {pulsewidth_L:4.2f}\tPulsewidth (R): {pulsewidth_R:4.2f}")
+            
+            pi.set_servo_pulsewidth(PWM_PIN_L, pulsewidth_L)
+            pi.set_servo_pulsewidth(PWM_PIN_R, pulsewidth_L)
     
     except KeyboardInterrupt:
         print("Keyboard interrupt")
