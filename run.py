@@ -244,7 +244,7 @@ class TUSC:
 			self.mode = STEER
 	
 	def print_debug(self):
-		print(f"{self.mode}\t{self.gear}\t{self.sensitivity:1.2f}\t\t{self.bldc_L.speed:3.2f}\t{self.bldc_L.pwm:3.2f}\t\t{self.bldc_R.speed:3.2f}\t{self.bldc_R.pwm:3.2f}")
+		print(f"{self.mode}\t{self.gear}\t{self.sensitivity:1.2f}\t\t{self.bldc_L.speed:3.2f}\t{self.bldc_L.pulsewidth:3.2f}\t\t{self.bldc_R.speed:3.2f}\t{self.bldc_R.pulsewidth:3.2f}")
 
 
 def main():
