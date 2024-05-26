@@ -22,7 +22,7 @@ const int IDLE_PULSEWIDTH = 1500;
 const int MAX_PULSEWIDTH = 2000;
 
 // Maxmum velocity in rpm
-const int MAX_VELOCITY = 5000;
+const int MAX_VELOCITY = 4000;
 
 // remote Input range
 const int INPUT_RANGE = 100;
@@ -143,8 +143,8 @@ void loop()
 
           if (pid == 0)
           {
-            pwmValue1 = map(speed_L, -MAX_VELOCITY, MAX_VELOCITY, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
-            pwmValue2 = map(speed_R, -MAX_VELOCITY, MAX_VELOCITY, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
+            leftPWM = map(inputLeftSpeed, -INPUT_RANGE, INPUT_RANGE, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
+            rightPWM = map(inputRightSpeed, -INPUT_RANGE, INPUT_RANGE, MIN_PULSEWIDTH, MAX_PULSEWIDTH);
           }
 
           if (status == 0) // Turn off
