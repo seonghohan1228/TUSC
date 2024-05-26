@@ -1,7 +1,5 @@
 import pigpio
 import pygame
-import time
-from packet import Packet
 import math
 
 
@@ -102,20 +100,19 @@ class BLDC:
 	IDLE_PULSEWIDTH = 1500
 	MAX_PULSEWIDTH = 2000
 
-	def __init__(self, pi, pin, scalar=10, trim=0):
+	def __init__(self, pi, pin, scalar=10):
 		self.pi = pi
 		self.pin = pin
 		self.input = 0
 		self.speed = 0  # -100 ~ 100
 		self.pwm = self.IDLE_PULSEWIDTH
 		self.scalar = scalar  # Percent of Max. PWM
-		self.trim = trim  # Percent
 
 		self.set_speed(self.input, self.scalar)
 
 	def set_speed(self, input, scalar):
 		self.scalar = scalar
-		self.speed = (self.scalar / 100) * input * (100 + self.trim)
+		self.speed = self.scalar * input
 		self.set_pwm()
 	
 	def set_pwm(self):
@@ -146,8 +143,8 @@ class TUSC:
 		self.set_scalar(self.gear)
 		self.lin_act = LinearActuator(self.pi, self.LIN_ACT_IN_1_PIN, \
 								  self.LIN_ACT_IN_2_PIN)
-		self.bldc_L = BLDC(self.pi, self.PWM_PIN_L, scalar=self.scalar, trim=0)
-		self.bldc_R = BLDC(self.pi, self.PWM_PIN_L, scalar=self.scalar, trim=0)
+		self.bldc_L = BLDC(self.pi, self.PWM_PIN_L, scalar=self.scalar)
+		self.bldc_R = BLDC(self.pi, self.PWM_PIN_L, scalar=self.scalar)
 		self.sensitivity = self.DEFAULT_SENSITIVITY
 		self.mode = STEER
 		self.pid = ON
@@ -166,28 +163,6 @@ class TUSC:
 	
 	def set_scalar(self, gear):
 		self.scalar = self.SCALARS[gear - 1]
-	
-	def trim(self, dir):
-		# Lower left motor PWM so robot steers to the left
-		if dir == "L":
-			# When trimming, make sure the other motor trim is 0
-			# If not, reduce trim on the other motor first
-			if self.bldc_R.trim == 0:
-				self.bldc_L.trim -= 5
-			else:
-				self.bldc_R.trim += 5
-		elif dir == "R":
-			if self.bldc_L.trim == 0:
-				self.bldc_R.trim -= 5
-			else:
-				self.bldc_L.trim += 5
-		else:
-			print("Wrong trim direction. Exiting...")
-			exit()
-	
-	def reset_trim(self):
-		self.bldc_L.trim = 0
-		self.bldc_R.trim = 0
 	
 	def led_control(self):
 		if self.mode == STEER:
