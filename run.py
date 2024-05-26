@@ -193,7 +193,6 @@ class TUSC:
 			self.pi.write(self.GEAR_3_LED_PIN, HIGH)
 			self.pi.write(self.GEAR_4_LED_PIN, HIGH)
 
-
 	def set_speed(self,input, steer_UD=None, steer_LR=None):
 		# LED control
 		self.led_control()
@@ -224,9 +223,7 @@ class TUSC:
 
 			mapped_input_L = max(input_min, min(input_max,input + (-interval*angle) ))
 			mapped_input_R = max(input_min, min(input_max ,input + (+interval*angle) ))			
-
-		#print(f"mapped_intput_L: {mapped_input_L}")
-		#print(f"mapped_input_R: {mapped_input_R}")
+		
 		self.bldc_L.set_speed(mapped_input_L, self.scalar)
 		self.bldc_R.set_speed(mapped_input_R, self.scalar)
 	
@@ -245,6 +242,9 @@ class TUSC:
 			self.mode = TANK
 		elif self.mode == TANK:
 			self.mode = STEER
+	
+	def print_debug(self):
+		print(f"{self.mode}\t{self.gear}\t{self.sensitivity}\t\t{self.bldc_L.speed}\t{self.bldc_L.pwm}\t\t{self.bldc_R.speed}\t{self.bldc_R.pwm}")
 
 
 def main():
@@ -267,14 +267,13 @@ def main():
 		
 		# Main loop
 		while True:
-			# Get joystick angle (negative is forward)
-
 			speed_input = None
 			axis_value_UD = None
 			axis_value_LR = None
 			axis_value_L = None
 			axis_value_R = None
 
+			# Get joystick angle (negative is forward)
 			if tusc.mode == TANK:
 				speed_input = None
 				axis_value_L = -joystick.get_axis(1)  # Left joystick y
@@ -287,8 +286,8 @@ def main():
 				r2_trigger = -(joystick.get_axis(ps4_axes["r2_trigger"]) + 1.0) /2.
 				speed_input = l2_trigger - r2_trigger
 			
-			# tusc.set_speed(axis_value_L, axis_value_R)
 			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R)
+			tusc.print_debug()
 
             # Handle Pygame events
 			events = pygame.event.get()
