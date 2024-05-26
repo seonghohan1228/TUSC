@@ -2,6 +2,7 @@ import pigpio
 import pygame
 import math
 
+### Test verified on pi3 ###
 
 DOWN = 0
 UP = 1
