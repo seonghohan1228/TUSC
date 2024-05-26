@@ -105,7 +105,7 @@ class BLDC:
 		self.pin = pin
 		self.input = 0
 		self.speed = 0  # -100 ~ 100
-		self.pwm = self.IDLE_PULSEWIDTH
+		self.pulsewidth = self.IDLE_PULSEWIDTH
 		self.scalar = scalar  # Percent of Max. PWM
 
 		self.set_speed(self.input, self.scalar)
@@ -244,7 +244,7 @@ class TUSC:
 			self.mode = STEER
 	
 	def print_debug(self):
-		print(f"{self.mode}\t{self.gear}\t{self.sensitivity}\t\t{self.bldc_L.speed}\t{self.bldc_L.pwm}\t\t{self.bldc_R.speed}\t{self.bldc_R.pwm}")
+		print(f"{self.mode}\t{self.gear}\t{self.sensitivity:1.2f}\t\t{self.bldc_L.speed:3.2f}\t{self.bldc_L.pwm:3.2f}\t\t{self.bldc_R.speed:3.2f}\t{self.bldc_R.pwm:3.2f}")
 
 
 def main():
