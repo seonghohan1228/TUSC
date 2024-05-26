@@ -44,7 +44,7 @@ def main():
                 pulsewidth_L = map_joystick(axis_value_L)
                 pulsewidth_R = map_joystick(axis_value_R)
 
-                print(f"Pulsewidth (L): {pulsewidth_L:4.2f}\Pulsewidth (R): {pulsewidth_R:4.2f}")
+                print(f"Pulsewidth (L): {pulsewidth_L:4.2f}\tPulsewidth (R): {pulsewidth_R:4.2f}")
                 
                 pi.set_servo_pulsewidth(PWM_PIN_L, pulsewidth_L)
                 pi.set_servo_pulsewidth(PWM_PIN_R, pulsewidth_L)
