@@ -1,8 +1,6 @@
 import pigpio
 import pygame
 import time
-import serial
-import struct
 from packet import Packet
 import math
 
@@ -51,6 +49,8 @@ ps4_axes = {
 	"r2_trigger": 5,
 }
 
+# Restricts the value of x to the range lower ~ upper
+restrict_range = lambda x, lower, upper: max(lower, min(x, upper))
 
 class LinearActuator:
 	def __init__(self, pi, input_1_pin, input_2_pin):
@@ -102,36 +102,38 @@ class BLDC:
 	IDLE_PULSEWIDTH = 1500
 	MAX_PULSEWIDTH = 2000
 
-	def __init__(self, scalar=10, trim=0):
+	def __init__(self, pi, pin, scalar=10, trim=0):
+		self.pi = pi
+		self.pin = pin
 		self.input = 0
-		self.speed = 0  # 0 ~ 100
+		self.speed = 0  # -100 ~ 100
+		self.pwm = self.IDLE_PULSEWIDTH
 		self.scalar = scalar  # Percent of Max. PWM
 		self.trim = trim  # Percent
-		
-		if self.scalar < 0 or self.scalar > 100:
-			print("Scalar outside range. Exiting...")
-			exit()
-
-		if self.trim < -100:
-			print("Trim value below minimum value. Exiting...")
-			exit()
 
 		self.set_speed(self.input, self.scalar)
 
 	def set_speed(self, input, scalar):
 		self.scalar = scalar
 		self.speed = (self.scalar / 100) * input * (100 + self.trim)
+		self.set_pwm()
+	
+	def set_pwm(self):
+		self.pulsewidth = (self.speed / 100) * (self.MAX_PULSEWIDTH - self.IDLE_PULSEWIDTH) + self.IDLE_PULSEWIDTH
+		self.pi.set_servo_pulsewidth(self.pin, self.pulsewidth)
 
 
 class TUSC:
-	LIN_ACT_IN_1_PIN = 22
-	LIN_ACT_IN_2_PIN = 27
-	STEER_MODE_LED_PIN = 23
-	TANK_MODE_LED_PIN = 24
-	GEAR_1_LED_PIN = 6
-	GEAR_2_LED_PIN = 13
-	GEAR_3_LED_PIN = 19
-	GEAR_4_LED_PIN = 26
+	PWM_PIN_L = 26
+	PWM_PIN_R = 23
+	LIN_ACT_IN_1_PIN = 2
+	LIN_ACT_IN_2_PIN = 3
+	STEER_MODE_LED_PIN = 4
+	TANK_MODE_LED_PIN = 5
+	GEAR_1_LED_PIN = 25
+	GEAR_2_LED_PIN = 24
+	GEAR_3_LED_PIN = 22
+	GEAR_4_LED_PIN = 21
 
 	SCALARS = [20, 40, 60, 80]
 	LIN_ACT_COUNT = 100
@@ -144,8 +146,8 @@ class TUSC:
 		self.set_scalar(self.gear)
 		self.lin_act = LinearActuator(self.pi, self.LIN_ACT_IN_1_PIN, \
 								  self.LIN_ACT_IN_2_PIN)
-		self.bldc_L = BLDC(scalar=self.scalar, trim=0)
-		self.bldc_R = BLDC(scalar=self.scalar, trim=0)
+		self.bldc_L = BLDC(self.pi, self.PWM_PIN_L, scalar=self.scalar, trim=0)
+		self.bldc_R = BLDC(self.pi, self.PWM_PIN_L, scalar=self.scalar, trim=0)
 		self.sensitivity = self.DEFAULT_SENSITIVITY
 		self.mode = STEER
 		self.pid = ON
@@ -286,8 +288,6 @@ def main():
 
 	# Run TUSC
 	try:
-		ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
-		ser.reset_input_buffer()
 		tusc = TUSC()
 		
 		# Main loop
@@ -313,15 +313,7 @@ def main():
 				speed_input = l2_trigger - r2_trigger
 			
 			# tusc.set_speed(axis_value_L, axis_value_R)
-			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R) 
-			# Create and send data packet
-			packet = Packet(ser)
-			packet.create(ON, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_R.speed))
-			packet.send()
-
-			if ser.in_waiting > 0:
-				line = ser.readline().decode('utf-8').rstrip()
-				print(line)
+			tusc.set_speed(input=speed_input, steer_UD=axis_value_UD or axis_value_L, steer_LR=axis_value_LR or axis_value_R)
 
             # Handle Pygame events
 			events = pygame.event.get()
@@ -333,12 +325,6 @@ def main():
 					tusc.set_speed(0, 0)
 					tusc.mode = STEER
 					tusc.gear = 1
-					packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
-					packet.send()
-					packet.send()
-					packet.send()
-					time.sleep(0.01)
-					ser.close()
 					tusc.pi.stop()
 					pygame.quit()
 					exit()
@@ -355,12 +341,6 @@ def main():
 						tusc.set_speed(0)
 						tusc.mode = STEER
 						tusc.gear = 1
-						packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
-						packet.send()
-						packet.send()
-						packet.send()
-						time.sleep(0.01)
-						ser.close()
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -397,20 +377,7 @@ def main():
 					if joystick.get_button(ps4_buttons["L1"]):
 						tusc.downshift()
 					elif joystick.get_button(ps4_buttons["R1"]):
-						tusc.upshift()
-					
-					# ## Trimming
-	 				# # Trim so that robot steers towards left
-					# if joystick.get_button(ps4_buttons["square"]):
-					# 	tusc.trim("L")
-	 				# # Trim so that robot steers towards right
-					# elif joystick.get_button(ps4_buttons["circle"]):
-					# 	tusc.trim("R")
-					# # Trim reset
-					# elif joystick.get_button(ps4_buttons["options"]):
-					# 	tusc.reset_trim()
-					
-				
+						tusc.upshift()				
 
 					## Sensitivity
 					if joystick.get_button(ps4_buttons["left"]):
@@ -429,7 +396,7 @@ def main():
 			# Flipper goes up
 			if tusc.mode == TANK:
 				up_down_flipper = -joystick.get_axis(ps4_axes["r_stick_v"])
-				print(f"up_down : {up_down_flipper}")
+				#print(f"up_down : {up_down_flipper}")
 
 				if up_down_flipper > 0.5:
 					tusc.lin_act.retract()
@@ -458,12 +425,6 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
-		packet.send()
-		packet.send()
-		packet.send()
-		time.sleep(0.01)
-		ser.close()
 		tusc.pi.stop()
 		pygame.quit()
 
@@ -471,12 +432,6 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
-		packet.create(OFF, tusc.pid, int(tusc.bldc_L.speed), int(tusc.bldc_L.speed))
-		packet.send()
-		packet.send()
-		packet.send()
-		time.sleep(0.01)
-		ser.close()
 		tusc.pi.stop()
 		pygame.quit()
 
