@@ -130,8 +130,8 @@ class TUSC:
 	TANK_MODE_LED_PIN = 24
 	GEAR_1_LED_PIN = 19
 	GEAR_2_LED_PIN = 26
-	GEAR_3_LED_PIN = 20
-	GEAR_4_LED_PIN = 21
+	GEAR_3_LED_PIN = 8
+	GEAR_4_LED_PIN = 7
 
 	SCALARS = [20, 40, 60, 80]
 	LIN_ACT_COUNT = 100
@@ -228,6 +228,9 @@ class TUSC:
 		self.bldc_L.set_speed(mapped_input_L, self.scalar)
 		self.bldc_R.set_speed(mapped_input_R, self.scalar)
 	
+		# LED control
+		self.led_control()
+
 	def increase_sensitivity(self):
 		self.sensitivity += 0.2
 		if self.sensitivity >= 1:
