@@ -12,7 +12,7 @@ float readDegreeAngle(TwoWire &wire)
 
   if (wire.available() < 2)
     return COM_FAIL;
-  
+
   uint8_t highByte = wire.read();
   uint8_t lowByte = wire.read();
 
@@ -31,17 +31,17 @@ bool setZeroPosition(TwoWire &wire, unsigned int zeroPosition)
   */
 
   // Check if the zeroPosition is within range (12-bit)
-  if (zeroPosition >= pow(2, 12)) 
+  if (zeroPosition >= pow(2, 12))
     return COM_FAIL;
 
   uint8_t highByte = zeroPosition >> 8;
   uint8_t lowByte = zeroPosition & 0xFF;
 
   wire.beginTransmission(AS5600_ADDR);
-  wire.write(ZPOSH_ADDR);          // AS5600 register 0x01 for high byte of ZPOS
-  wire.write(highByte);            // Write high byte of zero position
-  wire.write(ZPOSL_ADDR);          // AS5600 register 0x02 for low byte of ZPOS
-  wire.write(lowByte);             // Write low byte of zero position
+  wire.write(ZPOSH_ADDR); // AS5600 register 0x01 for high byte of ZPOS
+  wire.write(highByte);   // Write high byte of zero position
+  wire.write(ZPOSL_ADDR); // AS5600 register 0x02 for low byte of ZPOS
+  wire.write(lowByte);    // Write low byte of zero position
 
   // Check if transmission was successful
   if (wire.endTransmission() == 0)
@@ -49,7 +49,6 @@ bool setZeroPosition(TwoWire &wire, unsigned int zeroPosition)
 
   return COM_FAIL;
 }
-
 
 uint8_t readStatus(TwoWire &wire)
 {
@@ -74,7 +73,7 @@ uint8_t readStatus(TwoWire &wire)
 
   if (!wire.available())
     return result;
-  
+
   // Read status register
   status = wire.read();
 
@@ -156,3 +155,38 @@ float readRPM(TwoWire &wire)
   return rpm;
 }
 
+int setFTH(TwoWire &wire, byte value)
+{
+  if (value > 0x07)
+  {
+    return COM_FAIL; // Invalid value for FTH (must be 0-7)
+  }
+
+  // Read current CONF register value
+  wire.beginTransmission(AS5600_ADDR);
+  wire.write(CONF_ADDR);
+  wire.endTransmission(false);
+  wire.requestFrom(AS5600_ADDR, 2);
+  if (wire.available() != 2)
+  {
+    return COM_FAIL;
+  }
+
+  byte msb = wire.read(); // Read high byte of CONF
+  byte lsb = wire.read(); // Read low byte of CONF
+
+  // Clear current FTH bits and set new value
+  lsb = (lsb & ~FTH_MASK) | (value << 2);
+
+  // Write new CONF register value
+  wire.beginTransmission(AS5600_ADDR);
+  wire.write(CONF_ADDR);
+  wire.write(msb); // Write high byte of CONF
+  wire.write(lsb); // Write modified low byte of CONF
+  if (wire.endTransmission() != 0)
+  {
+    return COM_FAIL;
+  }
+
+  return COM_SUCCESS;
+}
