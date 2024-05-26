@@ -300,9 +300,9 @@ def main():
 				if event.type == pygame.JOYDEVICEREMOVED:
 					print("Joystick disconnected.")
 					print("Quiting...")
-					tusc.set_speed(0, 0)
 					tusc.mode = STEER
 					tusc.gear = 1
+					tusc.set_speed(0, 0)
 					tusc.pi.stop()
 					pygame.quit()
 					exit()
@@ -316,9 +316,9 @@ def main():
 						print()
 						print("Software Kill Switch triggered.")
 						print("Quiting...")
-						tusc.set_speed(0)
 						tusc.mode = STEER
 						tusc.gear = 1
+						tusc.set_speed(0, 0)
 						tusc.pi.stop()
 						pygame.quit()
 						exit()
@@ -400,9 +400,9 @@ def main():
 
 	except KeyboardInterrupt:
 		print("Keyboard interrupt")
-		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
+		tusc.set_speed(0, 0)
 		tusc.pi.stop()
 		pygame.quit()
 
@@ -410,6 +410,7 @@ def main():
 		tusc.set_speed(0)
 		tusc.mode = STEER
 		tusc.gear = 1
+		tusc.set_speed(0, 0)
 		tusc.pi.stop()
 		pygame.quit()
 
