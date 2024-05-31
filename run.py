@@ -133,7 +133,7 @@ class TUSC:
 	GEAR_3_LED_PIN = 8
 	GEAR_4_LED_PIN = 7
 
-	SCALARS = [20, 40, 60, 80]
+	SCALARS = [20, 40, 65, 90]
 	LIN_ACT_COUNT = 100
 	DEFAULT_SENSITIVITY = 0.2
 
@@ -209,6 +209,8 @@ class TUSC:
 		
 		if self.mode == STEER:
 			interval = 0.5*self.sensitivity
+			if self.scalar == 20:
+				interval = 0.5 * 1.0
 			forward = True if steer_UD >= 0 else False
 			
 			if steer_LR**2 + steer_UD**2 > 0.5**2:
@@ -219,8 +221,11 @@ class TUSC:
 			forth = True if input > 0. else False
 			stop = True if input == 0. else False
 
-			input_max = (1. if forth else 0.) if not stop else 1.
-			input_min = (0. if forth else -1.) if not stop else -1.
+			# input_max = (1. if forth else 0.) if not stop else 1.
+			# input_min = (0. if forth else -1.) if not stop else -1.
+
+			input_max = (1. if forth else 0.) if not stop else 0.
+			input_min = (0. if forth else -1.) if not stop else 0.
 
 			mapped_input_L = max(input_min, min(input_max,input + (-interval*angle) ))
 			mapped_input_R = max(input_min, min(input_max ,input + (+interval*angle) ))			
@@ -335,7 +340,7 @@ def main():
 						tusc.lin_act.joystick_control = False
 
 					# Flipper switches direction if R stick is pressed
-					if joystick.get_button(ps4_buttons["cross"]):
+					if joystick.get_button(ps4_buttons["square"]):
 						# If linear actuator has stopped, set to extend
 						if tusc.lin_act.in_1_val == LOW and tusc.lin_act.in_2_val == LOW:
 							tusc.lin_act.extend()
@@ -358,9 +363,9 @@ def main():
 						tusc.upshift()				
 
 					## Sensitivity
-					if joystick.get_button(ps4_buttons["left"]):
+					if joystick.get_button(ps4_buttons["cross"]):
 						tusc.decrease_sensitivity()
-					elif joystick.get_button(ps4_buttons["right"]):
+					elif joystick.get_button(ps4_buttons["circle"]):
 						tusc.increase_sensitivity()
 					elif joystick.get_button(ps4_buttons["share"]):
 						tusc.sensitivity = tusc.sensitivity
